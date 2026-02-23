@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:href="@{/css/output.css}" rel="stylesheet"> <!-- Tailwind CSS -->
+    <title>Home page of Income and Expenses Application</title>
+</head>
+
+<body>
+    <div>
+        <h1>Home page of Income and Expenses Application</h1>
+    </div>
+
+    <br><br>
+
+    <p>Here you can manage your income and expenses</p>
+    <p>Go to <a th:href="@{/login}">login</a> page to login</p>
+    <p>Go to <a th:href="@{/register}">register</a> page to register</p>
+    <p>Go to <a th:href="@{/users}">users</a> page to see all users</p>
+
+    <br><br>
+
+    <form th:action="@{/logout}" method="post">
+        <!-- <button>Logout</button> -->
+        <button class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-secondary border border-secondary-line text-secondary-foreground hover:bg-secondary-hover focus:outline-hidden focus:bg-secondary-hover disabled:opacity-50 disabled:pointer-events-none">
+            Выход
+        </button>
+    </form>
+
+    <script th:src="@{/js/preline.js}"></script> <!-- Preline UI -->
+
+</body>
+
+</html>
