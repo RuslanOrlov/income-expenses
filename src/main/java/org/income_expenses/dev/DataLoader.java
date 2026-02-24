@@ -20,16 +20,19 @@ public class DataLoader implements CommandLineRunner {
                 .username("user1")
                 .password(passwordEncoder.encode("1"))
                 .role("USER")
+                .email("user1@google.com")
                 .build());
         repo.save(MyUser.builder()
                 .username("user2")
                 .password(passwordEncoder.encode("2"))
                 .role("USER")
+                .email("user2@google.com")
                 .build());
         repo.save(MyUser.builder()
                 .username("admin1")
                 .password(passwordEncoder.encode("1"))
                 .role("ADMIN")
+                .email("admin1@google.com")
                 .build());
     }
 }
