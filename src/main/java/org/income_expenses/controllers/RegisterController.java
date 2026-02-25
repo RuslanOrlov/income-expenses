@@ -24,7 +24,7 @@ public class RegisterController {
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping
-    public String register() {
+    public String openRegisterForm() {
         return "register";
     }
 
@@ -32,28 +32,25 @@ public class RegisterController {
     public String registerUser(@Valid RegisterForm user,
                                BindingResult errors,
                                Model model) {
-        if (errors.hasErrors() ||
-                !user.isConfirmEqualsPassword() ||
-                userService.checkUserExists(user.getUsername())) {
-
-            if (errors.hasErrors()) {
-                List<FieldError> fieldErrors = errors.getFieldErrors();
-                for (FieldError fieldError : fieldErrors) {
-                    if (fieldError.getField().equals("password"))
-                        model.addAttribute("errorEmptyPass", true);
-                    if (fieldError.getField().equals("username"))
-                        model.addAttribute("errorEmptyName", true);
-                }
-            }
-
-            if (!user.isConfirmEqualsPassword())
-                model.addAttribute("errorMismatchPass", true);
-            if (userService.checkUserExists(user.getUsername()))
-                model.addAttribute("errorUser", true);
+        if (!userService.isCorrectNewUser(user, errors, model)) {
             return "register";
         }
-
-        userService.saveUser(user.toUser(passwordEncoder));
         return "redirect:/login";
+    }
+
+
+    @GetMapping("/admin-mode")
+    public String openRegisterFormForAdminMode () {
+        return "register-for-admin-mode";
+    }
+
+    @PostMapping("/admin-mode")
+    public String registerUserForAdminMode(@Valid RegisterForm user,
+                               BindingResult errors,
+                               Model model) {
+        if (!userService.isCorrectNewUser(user, errors, model)) {
+            return "register-for-admin-mode";
+        }
+        return "redirect:/settings/users";
     }
 }

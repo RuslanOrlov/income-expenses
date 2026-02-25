@@ -13,13 +13,13 @@ public class ChangePasswordForm {
     @NotBlank(message = "Текущий пароль пользователя не может быть пустым")
     private String currentPass;
     @NotBlank(message = "Новый пароль не может быть пустым")
-    private String password;
+    private String newPassword;
     @NotBlank(message = "Подтверждение нового пароля не может быть пустым")
     private String confirm;
     private String role;
     private String email;
 
-    public boolean isConfirmEqualsPassword() {
-        return confirm.equals(password);
+    public boolean isConfirmEqualsNewPassword() {
+        return confirm.equals(newPassword);
     }
 }

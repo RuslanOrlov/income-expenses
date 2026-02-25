@@ -12,10 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
@@ -24,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class SettingsController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     @GetMapping
     public String getSettings() {
@@ -35,7 +31,15 @@ public class SettingsController {
     public String getUserProfile(Model model,
                                  @AuthenticationPrincipal MyUser user) {
         model.addAttribute("user", user);
+        model.addAttribute("returnTo", "/settings");
         return "user-profile";
+    }
+
+    @GetMapping("/users/{id}")
+    public String getUserById(@PathVariable("id") Long id, Model model) {
+        model.addAttribute("user", userService.getUserById(id));
+        model.addAttribute("returnTo", "/settings/users");
+        return "user-profile-for-admin-mode";
     }
 
     @GetMapping("/cnahge-password")
@@ -50,8 +54,6 @@ public class SettingsController {
                         .email(user.getEmail())
                         .build());
 
-        String referer = request.getHeader("Referer");
-
         return "user-password-change";
     }
 
@@ -62,25 +64,12 @@ public class SettingsController {
             @Valid @ModelAttribute("user") ChangePasswordForm form,
             BindingResult errors) {
 
-        if (errors.hasErrors() ||
-                !form.isConfirmEqualsPassword() ||
-                !passwordEncoder.matches(form.getCurrentPass(), currentUser.getPassword())) {
-            // Доработать форму user-password-change, чтобы она выводила в форму
-            // стандартные собщения из аннотаций валидации в классе ChangePasswordForm
-            if (!form.isConfirmEqualsPassword())
-                model.addAttribute("confirmPasswordError", true);
-
-            if (!passwordEncoder.matches(form.getCurrentPass(), currentUser.getPassword()))
-                model.addAttribute("currentPasswordError", true);
-
+        if ( !userService.isCorrectNewPassword(
+                currentUser.getId(),
+                form,
+                errors, model) ) {
             return "user-password-change";
-        };
-        MyUser myUser = userService.getUserById(currentUser.getId());
-
-        myUser.setPassword(passwordEncoder.encode(form.getPassword()));
-
-        userService.saveUser(myUser);
-
+        }
         return "redirect:/settings";
     }
 

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
-    <title>Authentication</title>
+    <title>Create New User</title>
 </head>
 
 <body class="flex flex-col min-h-screen">
@@ -25,15 +25,14 @@
                 <!-- Sign Up -->
                 <div class="p-4 sm:p-7">
                     <div class="text-center">
-                        <h3 id="hs-modal-signin-label" class="block text-2xl font-bold text-foreground">Зарегистрироваться</h3>
+                        <h3 id="hs-modal-signin-label" class="block text-2xl font-bold text-foreground">Создать пользователя</h3>
                         <p class="mt-2 text-sm text-muted-foreground-2">
-                            У вас уже есть аккаунт?
+                            Или вернитесь
                             <a class="text-primary decoration-2 hover:underline focus:outline-hidden focus:underline font-medium"
-                               th:href="@{/login}">
-                                Войдите здесь
+                               th:href="@{/settings/users}">
+                                в список пользователей
                             </a>
-                            <br>
-                            Или вернитесь на
+                            либо на
                             <a class="text-primary decoration-2 hover:underline focus:outline-hidden focus:underline font-medium"
                                th:href="@{/}">
                                 главную страницу
@@ -42,7 +41,7 @@
                     </div>
 
                     <div class="mt-5">
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus" href="#">
+                        <!--<a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus" href="#">
                             <svg class="w-4 h-auto" width="46" height="47" viewBox="0 0 46 47" fill="none">
                                 <path d="M46 24.0287C46 22.09 45.8533 20.68 45.5013 19.2112H23.4694V27.9356H36.4069C36.1429 30.1094 34.7347 33.37 31.5957 35.5731L31.5663 35.8669L38.5191 41.2719L38.9885 41.3306C43.4477 37.2181 46 31.1669 46 24.0287Z" fill="#4285F4"/>
                                 <path d="M23.4694 47C29.8061 47 35.1161 44.9144 39.0179 41.3012L31.625 35.5437C29.6301 36.9244 26.9898 37.8937 23.4987 37.8937C17.2793 37.8937 12.0281 33.7812 10.1505 28.1412L9.88649 28.1706L2.61097 33.7812L2.52296 34.0456C6.36608 41.7125 14.287 47 23.4694 47Z" fill="#34A853"/>
@@ -52,10 +51,10 @@
                             Зарегистрироваться с помощью Google
                         </a>
 
-                        <div class="py-3 flex items-center text-xs text-muted-foreground uppercase before:flex-1 before:border-t before:border-line-2 before:me-6 after:flex-1 after:border-t after:border-line-2 after:ms-6">или</div>
+                        <div class="py-3 flex items-center text-xs text-muted-foreground uppercase before:flex-1 before:border-t before:border-line-2 before:me-6 after:flex-1 after:border-t after:border-line-2 after:ms-6">или</div>-->
 
                         <!-- Form -->
-                        <form th:method="post" th:action="@{/register}">
+                        <form th:method="post" th:action="@{/register/admin-mode}">
                             <div class="grid gap-y-4">
                                 <!-- Form Group -->
                                 <div>
@@ -178,7 +177,7 @@
 
                                 <button type="submit"
                                         class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none">
-                                    Зарегистрировать пользователя
+                                    Создать пользователя
                                 </button>
                                 <!--
                                 <button type="button"

@@ -1,16 +1,305 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head>
     <meta charset="UTF-8">
-    <title>Users List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
+    <title>Users List page</title>
 </head>
 
-<body>
-    <h1>Users List</h1>
-    <p>Here you can see all users</p>
-    <a th:href="@{/}">Home</a>
-    <!-- New line -->
-</body>
+<body class="flex flex-col min-h-screen">
 
+<header class="flex-none flex flex-wrap sm:justify-start sm:flex-nowrap w-full py-3 bg-navbar border-b border-navbar-line">
+    <nav class="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between">
+        <a class="flex-none font-bold text-xl text-foreground focus:outline-hidden focus:opacity-80" th:href="@{/}" aria-label="Brand">
+            <h1 class="m-0">Управление персональными финансами</h1>
+        </a>
+        <div class="flex flex-row items-center gap-5 mt-5 sm:justify-end sm:mt-0 sm:ps-5">
+            <a class="text-sm font-medium text-primary-active focus:outline-hidden" href="#" aria-current="page">Семейный счет</a>
+            <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus" href="#">Доходы</a>
+            <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus" href="#">Расходы</a>
+            <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus" href="#">Аналитика и отчеты</a>
+
+            <!-- Вертикальный разделитель (опционально) НЕ ОТОБРАЖАЕТСЯ  -->
+            <div class="hidden sm:block flex-none w-[2px] h-6 bg-gray-200 mx-2"></div>
+
+            <!-- Кнопки действий -->
+            <div class="flex items-center gap-x-3">
+                <a sec:authorize="isAnonymous()" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/login}">Войти</a>
+                <a sec:authorize="isAuthenticated()" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/logout-confirm}">Выйти</a>
+                <a sec:authorize="isAnonymous()" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/register}">Зарегистрироваться</a>
+                <a class="size-[40px] inline-flex items-center justify-center rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden overflow-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/settings}">
+                    <img src="https://pngicon.ru/file/uploads/2_43.png" alt="Администрирование" class="size-[30px] object-contain">
+                </a>
+            </div>
+
+        </div>
+    </nav>
+</header>
+
+<main class="flex flex-1 overflow-hidden">
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto w-full px-4 sm:px-6 md:px-8">
+        <!-- Table Section -->
+        <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            <!-- Card -->
+            <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-layer border border-layer-line rounded-xl shadow-2xs overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-table-line">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-foreground">
+                                        Список пользователей
+                                    </h2>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-red-500 shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                            Удалить (2)
+                                        </a>
+
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                            Изменить пароль
+                                        </a>
+
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none"
+                                           th:href="@{/register/admin-mode}">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                            Создать
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+                            <!-- Table -->
+                            <table class="min-w-full divide-y divide-table-line">
+                                <thead class="bg-muted">
+                                <tr>
+                                    <th scope="col" class="ps-6 py-3 text-start">
+                                        <label for="hs-at-with-checkboxes-main" class="flex">
+                                            <input type="checkbox" class="shrink-0 size-4 bg-transparent border-line-3 rounded-sm shadow-2xs text-primary focus:ring-0 focus:ring-offset-0 checked:bg-primary-checked checked:border-primary-checked disabled:opacity-50 disabled:pointer-events-none" id="hs-at-with-checkboxes-main">
+                                            <span class="sr-only">Checkbox</span>
+                                        </label>
+                                    </th>
+
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span class="text-xs font-semibold uppercase text-foreground">
+                                                Id
+                                            </span>
+                                        </div>
+                                    </th>
+
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span class="text-xs font-semibold uppercase text-foreground">
+                                                Пользователь
+                                            </span>
+                                        </div>
+                                    </th>
+
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span class="text-xs font-semibold uppercase text-foreground">
+                                                Role
+                                            </span>
+                                        </div>
+                                    </th>
+
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span class="text-xs font-semibold uppercase text-foreground">
+                                                Email
+                                            </span>
+                                        </div>
+                                    </th>
+
+                                    <th scope="col" class="px-6 py-3 text-end"></th>
+                                </tr>
+                                </thead>
+
+                                <tbody class="divide-y divide-table-line">
+                                <tr th:each="user : ${users}">
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="ps-6 py-2">
+                                            <label for="hs-at-with-checkboxes-1" class="flex">
+                                                <input type="checkbox" class="shrink-0 size-4 bg-transparent border-line-3 rounded-sm shadow-2xs text-primary focus:ring-0 focus:ring-offset-0 checked:bg-primary-checked checked:border-primary-checked disabled:opacity-50 disabled:pointer-events-none" id="hs-at-with-checkboxes-1" checked>
+                                                <span class="sr-only">Checkbox</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span th:text="${user.getId()}" class="text-sm text-muted-foreground-2">Id</span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <div class="flex items-center gap-x-2">
+                                                <img class="inline-block size-9 rounded-full" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80" alt="Avatar">
+                                                <div class="grow">
+                                                    <span th:text="${user.getUsername()}" class="text-sm text-muted-foreground-2">username</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span th:text="${user.getRole()}" class="text-sm text-muted-foreground-2">role</span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span th:text="${user.getEmail()}" class="text-sm text-muted-foreground-2">email</span>
+                                        </div>
+                                    </td>
+
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-1.5">
+                                            <div class="hs-dropdown [--placement:bottom-right] relative inline-block">
+                                                <button id="hs-table-dropdown-1" type="button" class="hs-dropdown-toggle py-1.5 px-2 inline-flex justify-center items-center gap-2 rounded-lg text-foreground align-middle disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-primary-focus transition-all text-sm" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                                </button>
+                                                <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-40 z-20 bg-dropdown border border-dropdown-line divide-y divide-dropdown-divider shadow-2xl rounded-lg p-1" role="menu" aria-orientation="vertical" aria-labelledby="hs-table-dropdown-1">
+                                                    <div class="py-2 first:pt-0 last:pb-0">
+                                                        <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
+                                                           th:href="@{/settings/users/{id}(id=${user.getId()})}">
+                                                            Открыть профиль
+                                                        </a>
+                                                        <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus" href="#">
+                                                            Изменить пароль
+                                                        </a>
+                                                        <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus" href="#">
+                                                            Заблокировать
+                                                        </a>
+                                                    </div>
+                                                    <div class="py-2 first:pt-0 last:pb-0">
+                                                        <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-destructive hover:bg-destructive-hover/10 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-destructive-focus/10" href="#">
+                                                            Удалить
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                            <!-- End Table -->
+
+                            <!-- Footer -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-table-line">
+                                <div class="inline-flex items-center gap-x-2">
+                                    <p class="text-sm text-muted-foreground-2">
+                                        Showing:
+                                    </p>
+                                    <div class="max-w-sm space-y-3">
+                                        <select class="py-2 px-3 pe-9 block w-full bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
+                                            <option>1</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option selected>9</option>
+                                            <option>20</option>
+                                        </select>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground-2">
+                                        of 20
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <button type="button"
+                                                th:onclick="|window.location.href = '@{/settings}'|"
+                                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                            Вернуться
+                                        </button>
+
+                                        <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                            Prev
+                                        </button>
+
+                                        <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
+                                            Next
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Card -->
+        </div>
+        <!-- End Table Section -->
+    </div>
+    <!-- End Content -->
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer class="flex-none w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-6 border-t border-footer-line">
+        <div class="flex flex-wrap justify-between items-center gap-2">
+            <div>
+                <p class="text-xs text-muted-foreground-2">
+                    © 2026 Preline Labs.
+                </p>
+            </div>
+            <!-- End Col -->
+
+            <!-- List -->
+            <ul class="flex flex-wrap items-center">
+                <li class="inline-block relative pe-4 text-xs last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-1.5 before:-translate-y-1/2 before:size-[3px] before:rounded-full before:bg-surface-3">
+                    <a class="text-xs text-muted-foreground-1 underline hover:text-primary-hover hover:decoration-2 focus:outline-hidden focus:decoration-2" href="#">
+                        X (Twitter)
+                    </a>
+                </li>
+                <li class="inline-block relative pe-4 text-xs last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-1.5 before:-translate-y-1/2 before:size-[3px] before:rounded-full before:bg-surface-3">
+                    <a class="text-xs text-muted-foreground-1 underline hover:text-primary-hover hover:decoration-2 focus:outline-hidden focus:decoration-2" href="#">
+                        Dribbble
+                    </a>
+                </li>
+                <li class="inline-block pe-4 text-xs">
+                    <a class="text-xs text-muted-foreground-1 underline hover:text-primary-hover hover:decoration-2 focus:outline-hidden focus:decoration-2" href="#">
+                        Github
+                    </a>
+                </li>
+                <li class="inline-block">
+                    <!-- Dark Mode -->
+                    <button type="button" class="hs-dark-mode hs-dark-mode-active:hidden relative flex justify-center items-center size-7 bg-layer border border-layer-line text-layer-foreground rounded-full hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus" data-hs-theme-click-value="dark">
+                        <span class="sr-only">Dark</span>
+                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                    </button>
+                    <button type="button" class="hs-dark-mode hs-dark-mode-active:flex hidden relative flex justify-center items-center size-7 bg-layer border border-layer-line text-layer-foreground rounded-full hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus" data-hs-theme-click-value="light">
+                        <span class="sr-only">Light</span>
+                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+                    </button>
+                    <!-- End Dark Mode -->
+                </li>
+            </ul>
+            <!-- End List -->
+        </div>
+    </div>
+</footer>
+<!-- ========== END FOOTER ========== -->
+
+<script th:src="@{/js/preline.js}"></script>                 <!-- Preline UI -->
+</body>
 </html>

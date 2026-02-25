@@ -8,12 +8,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Data
 public class RegisterForm {
 
-    @NotBlank(message = "Имя пользователя не должно быть пустым")
+    @NotBlank(message = "Имя пользователя не может быть пустым")
     private String username;
     @NotBlank(message = "Пароль пользователя не может быть пустым")
     private String password;
     private String confirm;
+    @NotBlank(message = "Необходимо указать роль пользователя")
     private String role;
+    @NotBlank(message = "Необходимо указать email пользователя")
     private String email;
 
     public boolean isConfirmEqualsPassword() {
