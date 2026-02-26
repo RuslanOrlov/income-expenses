@@ -28,6 +28,7 @@ public class RegisterForm {
                 .password(passwordEncoder.encode(password))
                 .role(role != null && !role.isEmpty() ? role : "USER")
                 .email(email)
+                .accountNonLocked(true)
                 .build();
     }
 }

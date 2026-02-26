@@ -1,10 +1,8 @@
 package org.income_expenses.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,16 +25,10 @@ public class LoginController {
     @GetMapping("/logout-confirm")
     public String logoutConfirm(Model model, HttpServletRequest request) {
         String returnUri = request.getHeader("Referer");
-        if (returnUri == null) {
-            returnUri = "/";
-        }
 
-        log.info("\n\n");
-        log.info("returnUri = {}", returnUri);
-        log.info("\n\n");
+        model.addAttribute("returnUri", returnUri != null? returnUri : "/");
 
-        model.addAttribute("returnUri", returnUri);
-        return "logout-confirm";
+        return "confirm-logout";
     }
 
     /* Так (см. ниже) тоже можно реализовать logout из системы, ЕСЛИ в SecurityConfig

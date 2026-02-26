@@ -21,18 +21,21 @@ public class DataLoader implements CommandLineRunner {
                 .password(passwordEncoder.encode("1"))
                 .role("USER")
                 .email("user1@google.com")
+                .accountNonLocked(true)
                 .build());
         repo.save(MyUser.builder()
                 .username("user2")
                 .password(passwordEncoder.encode("2"))
                 .role("USER")
                 .email("user2@google.com")
+                .accountNonLocked(true)
                 .build());
         repo.save(MyUser.builder()
                 .username("admin1")
                 .password(passwordEncoder.encode("1"))
                 .role("ADMIN")
                 .email("admin1@google.com")
+                .accountNonLocked(true)
                 .build());
     }
 }

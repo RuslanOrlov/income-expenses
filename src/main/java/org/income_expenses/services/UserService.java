@@ -1,5 +1,7 @@
 package org.income_expenses.services;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +9,9 @@ import org.income_expenses.dto.ChangePasswordForm;
 import org.income_expenses.dto.RegisterForm;
 import org.income_expenses.models.MyUser;
 import org.income_expenses.repositories.UserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -102,5 +106,15 @@ public class UserService {
 
         saveUser(user.toUser(passwordEncoder));
         return true;
+    }
+
+    public boolean lockUser(Long id, MyUser currentUser) {
+        MyUser user = getUserById(id);
+
+        user.setAccountNonLocked(!user.isAccountNonLocked());
+
+        saveUser(user);
+
+        return id == currentUser.getId();
     }
 }
