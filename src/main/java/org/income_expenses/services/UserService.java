@@ -9,6 +9,9 @@ import org.income_expenses.dto.ChangePasswordForm;
 import org.income_expenses.dto.RegisterForm;
 import org.income_expenses.models.MyUser;
 import org.income_expenses.repositories.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -29,7 +32,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public List<MyUser> users() {
-        return userRepository.findAll();
+        return userRepository.findAll(Sort.by("id"));
+    }
+
+    public List<MyUser> users(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+        return userRepository.findAll(pageable).getContent();
+    }
+
+    public long usersCount() {
+        return userRepository.count();
     }
 
     public void saveUser(MyUser user) {

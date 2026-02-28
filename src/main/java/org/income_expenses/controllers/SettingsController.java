@@ -10,7 +10,6 @@ import org.income_expenses.models.MyUser;
 import org.income_expenses.services.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +27,14 @@ public class SettingsController {
     @GetMapping
     public String getSettings() {
         return "settings";
+    }
+
+    // Методы управления доступом к профилю своего
+    // пользователя и изменением своего пароля
+
+    @ModelAttribute("totalListElements")
+    public long totalElements() {
+        return userService.usersCount();
     }
 
     @GetMapping("/user-profile")
@@ -72,9 +79,83 @@ public class SettingsController {
         return "redirect:/settings";
     }
 
+    // Методы управления постраничным просмотром списка пользователей
+    @GetMapping("/users/prev")
+    public String prevPageUsers(@AuthenticationPrincipal MyUser currentUser) {
+        // Обновляем доступные текущему пользователю
+        // количество элементов списка и количество страниц
+        long totalElements = calculateTotalElements();
+        int totalPages = calculateTotaPages(totalElements, currentUser.getPageSize());
+        currentUser.setTotalElements(totalElements);
+        currentUser.setTotalPages(totalPages);
+
+        // Изменяем текущую страницу
+        if (currentUser.getCurPage() > 0) {
+            currentUser.setCurPage(currentUser.getCurPage() - 1);
+        }
+
+        // Сохраняем текущего пользователя
+        userService.saveUser(currentUser);
+
+        // Переходим в список пользователей
+        return "redirect:/settings/users";
+    }
+
+    @GetMapping("/users/next")
+    public String nextPageUsers(@AuthenticationPrincipal MyUser currentUser) {
+        // Обновляем доступные текущему пользователю
+        // количество элементов списка и количество страниц
+        long totalElements = calculateTotalElements();
+        int totalPages = calculateTotaPages(totalElements, currentUser.getPageSize());
+        currentUser.setTotalElements(totalElements);
+        currentUser.setTotalPages(totalPages);
+
+        // Изменяем текущую страницу
+        if (currentUser.getCurPage() < totalPages) {
+            currentUser.setCurPage(currentUser.getCurPage() + 1);
+        } else if (currentUser.getCurPage() > totalPages) {
+            currentUser.setCurPage(totalPages);
+        }
+
+        // Сохраняем текущего пользователя
+        userService.saveUser(currentUser);
+
+        // Переходим в список пользователей
+        return "redirect:/settings/users";
+    }
+
+    @PostMapping("/users/change-page-size")
+    public String changePageSizeUsers(@ModelAttribute("current") MyUser current,
+                                      @AuthenticationPrincipal MyUser currentUser) {
+        // Это (ниже) временный "жеский" код
+        if (current.getPageSize() < 1) {
+            current.setPageSize(1);
+        } else if (current.getPageSize() > 20) {
+            current.setPageSize(20);
+        }
+        // Это (выше) временный "жеский" код
+        currentUser.setPageSize(current.getPageSize());
+        userService.saveUser(currentUser);
+        return "redirect:/settings/users";
+    }
+
+    private long calculateTotalElements() {
+        return userService.usersCount();
+    }
+
+    private int calculateTotaPages(long totalElements, int pageSize) {
+        if (totalElements % pageSize == 0) {
+            return (int) totalElements / pageSize - 1;
+        }
+        return (int) totalElements / pageSize;
+    }
+
+    // Методы управления списком пользователей
     @GetMapping("/users")
-    public String getUsers(Model model) {
-        model.addAttribute("users", userService.users());
+    public String getUsers(Model model, @AuthenticationPrincipal MyUser currentUser) {
+        model.addAttribute("users", userService.users(
+                currentUser.getCurPage(), currentUser.getPageSize()));
+        model.addAttribute("current", currentUser);
         return "users-list";
     }
 

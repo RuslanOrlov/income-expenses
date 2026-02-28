@@ -63,14 +63,14 @@
 
                                 <div>
                                     <div class="inline-flex gap-x-2">
-                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-red-500 shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                        <!--<a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-red-500 shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none" href="#">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                                             Удалить (2)
                                         </a>
 
                                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none" href="#">
                                             Изменить пароль
-                                        </a>
+                                        </a>-->
 
                                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none"
                                            th:href="@{/register/admin-mode}">
@@ -237,21 +237,29 @@
                             <!-- Footer -->
                             <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-table-line">
                                 <div class="inline-flex items-center gap-x-2">
+
                                     <p class="text-sm text-muted-foreground-2">
-                                        Showing:
+                                        Показать:
                                     </p>
                                     <div class="max-w-sm space-y-3">
-                                        <select class="py-2 px-3 pe-9 block w-full bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
-                                            <option>1</option>
-                                            <option>2</option>
-                                            <option>3</option>
-                                            <option>4</option>
-                                            <option selected>9</option>
-                                            <option>20</option>
+                                        <form th:object="${current}"
+                                              th:action="@{/settings/users/change-page-size}"
+                                              th:method="post">
+                                        <select th:field="*{pageSize}"
+                                                onchange="this.form.submit()"
+                                                class="py-2 px-3 pe-9 block w-full bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
+                                            <option value="1" th:selected="*{pageSize == 1}">1</option>
+                                            <option value="2" th:selected="*{pageSize == 2}">2</option>
+                                            <option value="3" th:selected="*{pageSize == 3}">3</option>
+                                            <option value="5" th:selected="*{pageSize == 5}">5</option>
+                                            <option value="7" th:selected="*{pageSize == 7}">7</option>
+                                            <option value="10" th:selected="*{pageSize == 10}">10</option>
+                                            <option value="20" th:selected="*{pageSize == 20}">20</option>
                                         </select>
+                                        </form>
                                     </div>
                                     <p class="text-sm text-muted-foreground-2">
-                                        of 20
+                                        of <span th:text="${totalListElements}"></span>
                                     </p>
                                 </div>
 
@@ -264,13 +272,17 @@
                                             Вернуться
                                         </button>
 
-                                        <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
+                                        <button type="button"
+                                                th:onclick="|window.location.href = '@{/settings/users/prev}'|"
+                                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                                            Prev
+                                            Назад
                                         </button>
 
-                                        <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
-                                            Next
+                                        <button type="button"
+                                                th:onclick="|window.location.href = '@{/settings/users/next}'|"
+                                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus disabled:opacity-50 disabled:pointer-events-none">
+                                            Вперед
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                                         </button>
                                     </div>
