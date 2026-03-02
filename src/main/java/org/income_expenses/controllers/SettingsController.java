@@ -32,38 +32,41 @@ public class SettingsController {
     // Методы управления доступом к профилю своего
     // пользователя и изменением своего пароля
 
-    @ModelAttribute("totalListElements")
+    @ModelAttribute("currentUser")
+    public MyUser currentUser(@AuthenticationPrincipal MyUser user) {
+        return user;
+    }
+
+    @ModelAttribute("totalElementsList")
     public long totalElements() {
         return userService.usersCount();
     }
 
     @GetMapping("/user-profile")
-    public String getUserProfile(Model model,
-                                 @AuthenticationPrincipal MyUser user) {
-        model.addAttribute("user", user);
+    public String getUserProfile(Model model) {
         model.addAttribute("returnTo", "/settings");
         model.addAttribute("mode", "user");
         return "user-profile";
     }
 
-    @GetMapping("/cnahge-password")
+    @GetMapping("/change-password")
     public String openChangePasswordForm(Model model,
-                                         @AuthenticationPrincipal MyUser user,
-                                         HttpServletRequest request) {
+                                         @AuthenticationPrincipal MyUser user) {
         model.addAttribute("user",
                 ChangePasswordForm.builder()
                         .id(user.getId())
                         .username(user.getUsername())
                         .role(user.getRole())
                         .email(user.getEmail())
+                        .mode("user")
                         .build());
         model.addAttribute("returnToWhenGet", "/settings/user-profile");
-        model.addAttribute("returnToWhenPost", "/settings/cnahge-password");
+        model.addAttribute("returnToWhenPost", "/settings/change-password");
 
         return "user-password-change";
     }
 
-    @PostMapping("/cnahge-password")
+    @PostMapping("/change-password")
     public String changeUserPassword(
             Model model,
             @AuthenticationPrincipal MyUser currentUser,
@@ -73,29 +76,26 @@ public class SettingsController {
         if ( !userService.isCorrectNewPassword(
                 currentUser.getId(),
                 form,
-                errors, model) ) {
+                errors, model, form.getMode()) ) {
+            model.addAttribute("returnToWhenGet", "/settings/user-profile");
+            model.addAttribute("returnToWhenPost", "/settings/change-password");
             return "user-password-change";
         }
+        currentUser.setPassword(userService.getEncodedPassword(form.getNewPassword()));
+
+        userService.saveUser(currentUser);
+
         return "redirect:/settings";
     }
 
     // Методы управления постраничным просмотром списка пользователей
     @GetMapping("/users/prev")
     public String prevPageUsers(@AuthenticationPrincipal MyUser currentUser) {
-        // Обновляем доступные текущему пользователю
-        // количество элементов списка и количество страниц
-        long totalElements = calculateTotalElements();
-        int totalPages = calculateTotaPages(totalElements, currentUser.getPageSize());
-        currentUser.setTotalElements(totalElements);
-        currentUser.setTotalPages(totalPages);
-
-        // Изменяем текущую страницу
-        if (currentUser.getCurPage() > 0) {
+        // Изменяем текущую страницу И сохраняем текущего пользователя
+        if (currentUser.getCurPage() > 1) {
             currentUser.setCurPage(currentUser.getCurPage() - 1);
+            userService.saveUser(currentUser);
         }
-
-        // Сохраняем текущего пользователя
-        userService.saveUser(currentUser);
 
         // Переходим в список пользователей
         return "redirect:/settings/users";
@@ -103,21 +103,17 @@ public class SettingsController {
 
     @GetMapping("/users/next")
     public String nextPageUsers(@AuthenticationPrincipal MyUser currentUser) {
-        // Обновляем доступные текущему пользователю
-        // количество элементов списка и количество страниц
-        long totalElements = calculateTotalElements();
-        int totalPages = calculateTotaPages(totalElements, currentUser.getPageSize());
-        currentUser.setTotalElements(totalElements);
-        currentUser.setTotalPages(totalPages);
-
-        // Изменяем текущую страницу
-        if (currentUser.getCurPage() < totalPages) {
+        // Изменяем текущую страницу пользователя
+        if (currentUser.getCurPage() < currentUser.getTotalPages()) {
             currentUser.setCurPage(currentUser.getCurPage() + 1);
-        } else if (currentUser.getCurPage() > totalPages) {
-            currentUser.setCurPage(totalPages);
+        } else if (currentUser.getCurPage() > currentUser.getTotalPages()) {
+            currentUser.setCurPage(currentUser.getTotalPages());
+        } else {
+            // Текущая страница НЕ изменилось, просто возвращаемся в список пользователей
+            return "redirect:/settings/users";
         }
 
-        // Сохраняем текущего пользователя
+        // Текущая страница пользователя изменилась, сохраняем текущего пользователя
         userService.saveUser(currentUser);
 
         // Переходим в список пользователей
@@ -125,16 +121,9 @@ public class SettingsController {
     }
 
     @PostMapping("/users/change-page-size")
-    public String changePageSizeUsers(@ModelAttribute("current") MyUser current,
+    public String changePageSizeUsers(@ModelAttribute("currentUser") MyUser user,
                                       @AuthenticationPrincipal MyUser currentUser) {
-        // Это (ниже) временный "жеский" код
-        if (current.getPageSize() < 1) {
-            current.setPageSize(1);
-        } else if (current.getPageSize() > 20) {
-            current.setPageSize(20);
-        }
-        // Это (выше) временный "жеский" код
-        currentUser.setPageSize(current.getPageSize());
+        currentUser.setPageSize(user.getPageSize());
         userService.saveUser(currentUser);
         return "redirect:/settings/users";
     }
@@ -143,19 +132,65 @@ public class SettingsController {
         return userService.usersCount();
     }
 
-    private int calculateTotaPages(long totalElements, int pageSize) {
+    private int calculateTotalPages(long totalElements, int pageSize) {
         if (totalElements % pageSize == 0) {
-            return (int) totalElements / pageSize - 1;
+            return (int) totalElements / pageSize;
         }
-        return (int) totalElements / pageSize;
+        return (int) totalElements / pageSize + 1;
+    }
+
+    private boolean isChangedProperties(MyUser user) {
+        // Флаг изменений в настройках пользователя
+        boolean isChanged = false;
+
+        // Вычисляем новые настройки пользователя:
+        // - количество элементов в списке
+        // - размер страницы в списке (если необходимо, сразу устанавливаем пользователю)
+        // - количество страниц в списке
+        // - текущую страницу
+        long totalElements = calculateTotalElements();
+        if (user.getPageSize() < 1) {
+            user.setPageSize(1);
+            isChanged = true;
+        } else if (user.getPageSize() > 20) {
+            user.setPageSize(20);
+            isChanged = true;
+        }
+        int totalPages = calculateTotalPages(totalElements, user.getPageSize());
+        if (user.getCurPage() < 1) {
+            user.setCurPage(1);
+            isChanged = true;
+        } else if (user.getCurPage() > totalPages) {
+            user.setCurPage(totalPages);
+            isChanged = true;
+        }
+
+        // Проверяем, изменились ли настройки:
+        // - количество элементов списка
+        // - количество страниц
+        // ЕСЛИ да, ТО устанавливаем пользователю новые настройки
+        if ( user.getTotalElements() != totalElements ||
+                user.getTotalPages() != totalPages ) {
+            user.setTotalElements(totalElements);
+            user.setTotalPages(totalPages);
+            isChanged = true;
+        }
+
+        return isChanged;
     }
 
     // Методы управления списком пользователей
     @GetMapping("/users")
     public String getUsers(Model model, @AuthenticationPrincipal MyUser currentUser) {
+        // Обновляем настройки текущего пользователю
+        // и сохраняем его, если настройки изменились
+        if (isChangedProperties(currentUser)) {
+            userService.saveUser(currentUser);
+        }
+
         model.addAttribute("users", userService.users(
-                currentUser.getCurPage(), currentUser.getPageSize()));
-        model.addAttribute("current", currentUser);
+                currentUser.getCurPage() - 1, currentUser.getPageSize()));
+
         return "users-list";
     }
 
@@ -167,11 +202,10 @@ public class SettingsController {
         return "user-profile";
     }
 
-    @GetMapping("/users/{id}/cnahge-password")
+    @GetMapping("/users/{id}/change-password")
     public String openChangePasswordFormAdminMode(
             @PathVariable("id") Long id,
-            Model model,
-            HttpServletRequest request) {
+            Model model) {
 
         MyUser user = userService.getUserById(id);
 
@@ -179,16 +213,18 @@ public class SettingsController {
                 ChangePasswordForm.builder()
                         .id(user.getId())
                         .username(user.getUsername())
+                        .currentPass("*")   // формальное значение, чтобы избежать проверки на пустое поле
                         .role(user.getRole())
                         .email(user.getEmail())
+                        .mode("admin")
                         .build());
         model.addAttribute("returnToWhenGet", "/settings/users");
-        model.addAttribute("returnToWhenPost", "/settings/users/cnahge-password");
+        model.addAttribute("returnToWhenPost", "/settings/users/change-password");
 
         return "user-password-change";
     }
 
-    @PostMapping("/users/cnahge-password")
+    @PostMapping("/users/change-password")
     public String changeUserPasswordAdminMode(
             Model model,
             @Valid @ModelAttribute("user") ChangePasswordForm form,
@@ -197,9 +233,16 @@ public class SettingsController {
         if ( !userService.isCorrectNewPassword(
                 form.getId(),
                 form,
-                errors, model) ) {
+                errors, model, form.getMode()) ) {
+            model.addAttribute("returnToWhenGet", "/settings/users");
+            model.addAttribute("returnToWhenPost", "/settings/users/change-password");
             return "user-password-change";
         }
+
+        MyUser user = userService.getUserById(form.getId());
+        user.setPassword(userService.getEncodedPassword(form.getNewPassword()));
+        userService.saveUser(user);
+
         return "redirect:/settings/users";
     }
 

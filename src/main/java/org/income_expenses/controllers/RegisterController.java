@@ -3,17 +3,14 @@ package org.income_expenses.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.income_expenses.dto.RegisterForm;
+import org.income_expenses.models.MyUser;
 import org.income_expenses.services.UserService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/register")
@@ -21,7 +18,6 @@ import java.util.List;
 public class RegisterController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     @GetMapping
     public String openRegisterForm() {
@@ -35,6 +31,11 @@ public class RegisterController {
         if (!userService.isCorrectNewUser(user, errors, model)) {
             return "register";
         }
+
+        MyUser newUser = user.toUser();
+        newUser.setPassword(userService.getEncodedPassword(newUser.getPassword()));
+        userService.saveUser(newUser);
+
         return "redirect:/login";
     }
 
@@ -51,6 +52,11 @@ public class RegisterController {
         if (!userService.isCorrectNewUser(user, errors, model)) {
             return "register-for-admin-mode";
         }
+
+        MyUser newUser = user.toUser();
+        newUser.setPassword(userService.getEncodedPassword(newUser.getPassword()));
+        userService.saveUser(newUser);
+
         return "redirect:/settings/users";
     }
 }

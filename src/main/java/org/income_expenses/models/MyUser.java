@@ -39,7 +39,7 @@ public class MyUser implements UserDetails {
     @Column(name = "email", nullable = false)
     private String email;
     @Column(name = "account_non_locked", nullable = false)
-    private boolean accountNonLocked;
+    private boolean accountNonLocked = true;
 
     // Поля управления постраничным просмотром данных пользователем
     @Column(name = "cur_page", nullable = false)

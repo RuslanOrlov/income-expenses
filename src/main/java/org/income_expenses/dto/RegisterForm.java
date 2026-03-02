@@ -31,4 +31,14 @@ public class RegisterForm {
                 .accountNonLocked(true)
                 .build();
     }
+
+    public MyUser toUser() {
+        return MyUser.builder()
+                .username(username)
+                .password(password)
+                .role(role != null && !role.isEmpty() ? role : "USER")
+                .email(email)
+                .accountNonLocked(true)
+                .build();
+    }
 }

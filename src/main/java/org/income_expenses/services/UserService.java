@@ -1,9 +1,5 @@
 package org.income_expenses.services;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.income_expenses.dto.ChangePasswordForm;
 import org.income_expenses.dto.RegisterForm;
@@ -12,9 +8,7 @@ import org.income_expenses.repositories.UserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -60,64 +54,75 @@ public class UserService {
     public boolean isCorrectNewPassword(Long id,
                                         ChangePasswordForm form,
                                         BindingResult errors,
-                                        Model model) {
+                                        Model model, String mode) {
         MyUser myUser = getUserById(id);
 
-        if (    errors.hasErrors() ||
-                !form.isConfirmEqualsNewPassword() ||
-                !passwordEncoder.matches(form.getCurrentPass(), myUser.getPassword()) ||
-                passwordEncoder.matches(form.getNewPassword(),  myUser.getPassword()) ) {
+        if ( mode.equals("admin") && (errors.hasErrors() || !form.isConfirmEqualsNewPassword()) ) {
+            // Новый пароль и подтверждение пароля не совпадают
+            if (!form.isConfirmEqualsNewPassword())
+                model.addAttribute("confirmNewPasswordError", true);
+            return false;
+        }
 
+        if ( mode.equals("user") &&
+                ( errors.hasErrors() ||
+                  !form.isConfirmEqualsNewPassword() ||
+                  !passwordEncoder.matches(form.getCurrentPass(), myUser.getPassword()) ||
+                  passwordEncoder.matches(form.getNewPassword(),  myUser.getPassword())
+                )
+           ) {
+
+            // Новый пароль и подтверждение пароля не совпадают
             if (!form.isConfirmEqualsNewPassword())
                 model.addAttribute("confirmNewPasswordError", true);
 
+            // Текущий пароль указан неправильно
             if (!passwordEncoder.matches(form.getCurrentPass(), myUser.getPassword()))
                 model.addAttribute("currentPasswordError", true);
 
+            // Новый пароль совпадает с теукщим паролем
             if (passwordEncoder.matches(form.getNewPassword(),  myUser.getPassword()))
                 model.addAttribute("newPasswordIsNotDifferentError", true);
             return false;
         };
-
-        myUser.setPassword(passwordEncoder.encode(form.getNewPassword()));
-
-        saveUser(myUser);
-
         return true;
+    }
+
+    public String getEncodedPassword(String newPassword) {
+        return passwordEncoder.encode(newPassword);
     }
 
     public boolean isCorrectNewUser(RegisterForm user,
                                     BindingResult errors,
                                     Model model) {
-        if ( errors.hasErrors() ||
-             !user.isConfirmEqualsPassword() ||
-             checkUserExists(user.getUsername()) ) {
+        boolean isCorrect = true;
 
-            if (errors.hasErrors()) {
-                List<FieldError> fieldErrors = errors.getFieldErrors();
-                for (FieldError fieldError : fieldErrors) {
-                    if (fieldError.getField().equals("password"))
-                        model.addAttribute("errorEmptyPass", true);
-                    if (fieldError.getField().equals("username"))
-                        model.addAttribute("errorEmptyName", true);
-                    if (fieldError.getField().equals("role"))
-                        model.addAttribute("errorRole", true);
-                    if (fieldError.getField().equals("email"))
-                        model.addAttribute("errorEmail", true);
-                }
+        if (errors.hasErrors()) {
+            isCorrect = false;
+            List<FieldError> fieldErrors = errors.getFieldErrors();
+            for (FieldError fieldError : fieldErrors) {
+                if (fieldError.getField().equals("password"))
+                    model.addAttribute("errorEmptyPass", true);
+                if (fieldError.getField().equals("username"))
+                    model.addAttribute("errorEmptyName", true);
+                if (fieldError.getField().equals("role"))
+                    model.addAttribute("errorRole", true);
+                if (fieldError.getField().equals("email"))
+                    model.addAttribute("errorEmail", true);
             }
-
-            if (!user.isConfirmEqualsPassword())
-                model.addAttribute("errorMismatchPass", true);
-
-            if (checkUserExists(user.getUsername()))
-                model.addAttribute("errorUser", true);
-
-            return false;
         }
 
-        saveUser(user.toUser(passwordEncoder));
-        return true;
+        if (!user.isConfirmEqualsPassword()) {
+            isCorrect = false;
+            model.addAttribute("errorMismatchPass", true);
+        }
+
+        if (checkUserExists(user.getUsername())) {
+            isCorrect = false;
+            model.addAttribute("errorUser", true);
+        }
+
+        return isCorrect;
     }
 
     public boolean lockUser(Long id, MyUser currentUser) {
@@ -129,4 +134,6 @@ public class UserService {
 
         return id == currentUser.getId();
     }
+
+
 }

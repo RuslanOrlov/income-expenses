@@ -204,7 +204,7 @@
                                                             Открыть профиль
                                                         </a>
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:href="@{/settings/users/{id}/cnahge-password(id=${user.getId()})}">
+                                                           th:href="@{/settings/users/{id}/change-password(id=${user.getId()})}">
                                                             Изменить пароль
                                                         </a>
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
@@ -242,7 +242,7 @@
                                         Показать:
                                     </p>
                                     <div class="max-w-sm space-y-3">
-                                        <form th:object="${current}"
+                                        <form th:object="${currentUser}"
                                               th:action="@{/settings/users/change-page-size}"
                                               th:method="post">
                                         <select th:field="*{pageSize}"
@@ -259,7 +259,7 @@
                                         </form>
                                     </div>
                                     <p class="text-sm text-muted-foreground-2">
-                                        of <span th:text="${totalListElements}"></span>
+                                        of <span th:text="${totalElementsList}"></span>
                                     </p>
                                 </div>
 

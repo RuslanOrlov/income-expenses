@@ -18,6 +18,7 @@ public class ChangePasswordForm {
     private String confirm;
     private String role;
     private String email;
+    private String mode;
 
     public boolean isConfirmEqualsNewPassword() {
         return confirm.equals(newPassword);
