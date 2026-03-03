@@ -7,14 +7,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.ChangePasswordForm;
 import org.income_expenses.models.MyUser;
+import org.income_expenses.services.SessionService;
 import org.income_expenses.services.UserService;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -23,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class SettingsController {
 
     private final UserService userService;
+    private final SessionService sessionService;
 
     @GetMapping
     public String getSettings() {
@@ -249,10 +256,11 @@ public class SettingsController {
     @GetMapping("/users/{id}/confirm-user-locking")
     public String userLockingConfirm(@PathVariable("id") Long id, Model model) {
         model.addAttribute("user", userService.getUserById(id));
-
+        model.addAttribute("action", "locking");
+        model.addAttribute("actionUri", "/settings/users/user-locking");
         model.addAttribute("returnTo", "/settings/users");
 
-        return "confirm-user-locking";
+        return "confirm-action-on-user";
     }
 
 
@@ -263,9 +271,46 @@ public class SettingsController {
                               HttpServletRequest request,
                               HttpServletResponse response) {
 
-        if (userService.lockUser(id, currentUser) && authentication != null) {
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
-            return "redirect:/";
+        String username = userService.getUserById(id).getUsername();
+
+        if (userService.lockUser(id, currentUser)) {
+            if (authentication != null) {
+                new SecurityContextLogoutHandler().logout(request, response, authentication);
+                return "redirect:/login?expired";
+            }
+        } else {
+            sessionService.expireUserSessions(username);
+        }
+
+        return "redirect:/settings/users";
+    }
+
+    @GetMapping("/users/{id}/confirm-user-deleting")
+    public String userDeleting(@PathVariable("id") Long id, Model model) {
+        model.addAttribute("user", userService.getUserById(id));
+        model.addAttribute("action", "deleting");
+        model.addAttribute("actionUri", "/settings/users/user-deleting");
+        model.addAttribute("returnTo", "/settings/users");
+
+        return "confirm-action-on-user";
+    }
+
+    @PostMapping("/users/user-deleting")
+    public String userDeleting(@RequestParam("id") Long id,
+                              @AuthenticationPrincipal MyUser currentUser,
+                              Authentication authentication,
+                              HttpServletRequest request,
+                              HttpServletResponse response) {
+
+        String username = userService.getUserById(id).getUsername();
+
+        if (userService.deleteUser(id, currentUser)) {
+            if (authentication != null) {
+                new SecurityContextLogoutHandler().logout(request, response, authentication);
+                return "redirect:/login?expired";
+            }
+        } else {
+            sessionService.expireUserSessions(username);
         }
 
         return "redirect:/settings/users";

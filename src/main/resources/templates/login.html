@@ -26,7 +26,8 @@
                 <div class="p-4 sm:p-7">
                     <div class="text-center">
                         <h3 id="hs-modal-signin-label" class="block text-2xl font-bold text-foreground">Вход в систему</h3>
-                        <p class="mt-2 text-sm text-muted-foreground-2">
+
+                        <p th:unless="${param.expired}" class="mt-2 text-sm text-muted-foreground-2">
                             У вас еще нет аккаунта?
                             <a class="text-primary decoration-2 hover:underline focus:outline-hidden focus:underline font-medium"
                                th:href="@{/register}">
@@ -39,6 +40,19 @@
                                 главную страницу
                             </a>
                         </p>
+
+                        <p th:if="${param.expired}" class="mt-2 text-sm text-muted-foreground-2">
+                            <span class="text-red-600 decoration-2 focus:outline-hidden font-medium">
+                                Ваша сессия была завершена принудительно по решению администратора
+                            </span>
+                            <br>
+                            Вернуться на
+                            <a class="text-primary decoration-2 hover:underline focus:outline-hidden focus:underline font-medium"
+                               th:href="@{/}">
+                                главную страницу
+                            </a>
+                        </p>
+
                     </div>
 
                     <div class="mt-5">
@@ -111,12 +125,6 @@
                                         class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none">
                                     Войти в систему
                                 </button>
-                                <!--
-                                <button type="button"
-                                        th:onclick="|window.location.href = '@{/}'|"
-                                        class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none">
-                                    На главную страницу
-                                </button> -->
                             </div>
                         </form>
                         <!-- End Form -->

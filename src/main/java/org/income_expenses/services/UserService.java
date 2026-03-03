@@ -135,5 +135,8 @@ public class UserService {
         return id == currentUser.getId();
     }
 
-
+    public boolean deleteUser(Long id, MyUser currentUser) {
+        userRepository.deleteById(id);
+        return id == currentUser.getId();
+    }
 }

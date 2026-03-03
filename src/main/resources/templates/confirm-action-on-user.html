@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
-    <title>The Confirmation of the User's Locking</title>
+    <title th:if="${action == 'locking'}">The Confirmation of the User's Locking</title>
+    <title th:if="${action == 'deleting'}">The Confirmation of the User's Deleting</title>
 </head>
 
 <body class="flex flex-col min-h-screen">
@@ -86,31 +87,42 @@
                         <!-- End Icon -->
 
                         <h3 id="hs-sign-out-alert-label" class="mb-2 text-2xl font-bold text-foreground">
-                            <span th:if="${user.isAccountNonLocked()}">Блокирование пользователя</span>
-                            <span th:if="${!user.isAccountNonLocked()}">Разблокирование пользователя</span>
+                            <span th:if="${user.isAccountNonLocked() and action == 'locking'}">Блокирование пользователя</span>
+                            <span th:if="${!user.isAccountNonLocked() and action == 'locking'}">Разблокирование пользователя</span>
+                            <span th:if="${action == 'deleting'}">Удаление пользователя</span>
                         </h3>
-                        <p th:if="${user.isAccountNonLocked()}"
+                        <p th:if="${user.isAccountNonLocked() && action == 'locking'}"
                            class="text-muted-foreground-1">
                             Вы уверены, что хотите заблокировать пользователя
                             <span th:text="${user.getUsername()}"></span>
                             ?
                         </p>
-                        <p th:if="${!user.isAccountNonLocked()}"
+                        <p th:if="${!user.isAccountNonLocked() && action == 'locking'}"
                            class="text-muted-foreground-1">
                             Вы уверены, что хотите разблокировать пользователя
                             <span th:text="${user.getUsername()}"></span>
                             ?
                         </p>
+                        <p th:if="${action == 'deleting'}"
+                           class="text-muted-foreground-1">
+                            Вы уверены, что хотите удалить пользователя
+                            <span th:text="${user.getUsername()}"></span>
+                            ?
+                        </p>
 
                         <form class="mt-6 flex justify-center gap-x-4"
-                              th:action="@{/settings/users/user-locking}" th:method="post">
+                              th:action="@{${actionUri}}" th:method="post">
 
                             <input type="hidden" name="id" th:value="${user.getId()}">
 
-                            <button type="submit"
+                            <button type="submit" th:if="${action == 'locking'}"
                                     class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
                                 <span th:if="${user.isAccountNonLocked()}">Заблокировать</span>
                                 <span th:if="${!user.isAccountNonLocked()}">Разаблокировать</span>
+                            </button>
+                            <button type="submit" th:if="${action == 'deleting'}"
+                                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
+                                <span>Удалить</span>
                             </button>
                             <button type="submit"
                                     class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none" data-hs-overlay="#hs-sign-out-alert"
