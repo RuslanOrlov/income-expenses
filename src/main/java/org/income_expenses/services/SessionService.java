@@ -1,7 +1,6 @@
 package org.income_expenses.services;
 
 import lombok.RequiredArgsConstructor;
-import org.income_expenses.models.MyUser;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;

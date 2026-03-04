@@ -22,8 +22,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    final UserRepository userRepository;
+    final PasswordEncoder passwordEncoder;
 
     public List<MyUser> users() {
         return userRepository.findAll(Sort.by("id"));
@@ -47,8 +47,8 @@ public class UserService {
         return user.orElseThrow(() -> new NoSuchElementException("No user found"));
     }
 
-    public boolean checkUserExists(String username) {
-        return userRepository.findByUsername(username).isPresent();
+    public boolean checkUserExists(String username, String email) {
+        return userRepository.findByUsernameOrEmail(username, email).isPresent();
     }
 
     public boolean isCorrectNewPassword(Long id,
@@ -83,6 +83,7 @@ public class UserService {
             // Новый пароль совпадает с теукщим паролем
             if (passwordEncoder.matches(form.getNewPassword(),  myUser.getPassword()))
                 model.addAttribute("newPasswordIsNotDifferentError", true);
+
             return false;
         };
         return true;
@@ -117,7 +118,7 @@ public class UserService {
             model.addAttribute("errorMismatchPass", true);
         }
 
-        if (checkUserExists(user.getUsername())) {
+        if (checkUserExists(user.getUsername(), user.getEmail())) {
             isCorrect = false;
             model.addAttribute("errorUser", true);
         }
