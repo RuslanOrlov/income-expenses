@@ -42,7 +42,7 @@ public class RegisterController {
 
     @GetMapping("/admin-mode")
     public String openRegisterFormForAdminMode () {
-        return "register-for-admin-mode";
+        return "register-admin-mode";
     }
 
     @PostMapping("/admin-mode")
@@ -50,7 +50,7 @@ public class RegisterController {
                                BindingResult errors,
                                Model model) {
         if (!userService.isCorrectNewUser(user, errors, model)) {
-            return "register-for-admin-mode";
+            return "register-admin-mode";
         }
 
         MyUser newUser = user.toUser();

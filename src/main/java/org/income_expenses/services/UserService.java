@@ -1,6 +1,7 @@
 package org.income_expenses.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.ChangePasswordForm;
 import org.income_expenses.dto.RegisterForm;
 import org.income_expenses.models.MyUser;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -66,9 +68,11 @@ public class UserService {
 
         if ( mode.equals("user") &&
                 ( errors.hasErrors() ||
-                  !form.isConfirmEqualsNewPassword() ||
-                  !passwordEncoder.matches(form.getCurrentPass(), myUser.getPassword()) ||
-                  passwordEncoder.matches(form.getNewPassword(),  myUser.getPassword())
+                        !form.isConfirmEqualsNewPassword() ||
+                        ( !"*".equals(form.getCurrentPass()) &&
+                                !passwordEncoder.matches(form.getCurrentPass(), myUser.getPassword())
+                        ) ||
+                        passwordEncoder.matches(form.getNewPassword(),  myUser.getPassword())
                 )
            ) {
 
@@ -76,9 +80,16 @@ public class UserService {
             if (!form.isConfirmEqualsNewPassword())
                 model.addAttribute("confirmNewPasswordError", true);
 
+            log.info("--- form.getCurrentPass() = {}", form.getCurrentPass());
             // Текущий пароль указан неправильно
-            if (!passwordEncoder.matches(form.getCurrentPass(), myUser.getPassword()))
-                model.addAttribute("currentPasswordError", true);
+            if (!"*".equals(form.getCurrentPass())) {
+                // Если currentPass == "*", значит пользователь был создан с помощью
+                // Google регистрации, и тогда ниже следующая проверка НЕ нужна
+                if (!passwordEncoder.matches(form.getCurrentPass(), myUser.getPassword())) {
+                    model.addAttribute("currentPasswordError", true);
+                    log.info("--- Текущий пароль указан неправильно - не совпадает");
+                }
+            }
 
             // Новый пароль совпадает с теукщим паролем
             if (passwordEncoder.matches(form.getNewPassword(),  myUser.getPassword()))
@@ -91,6 +102,10 @@ public class UserService {
 
     public String getEncodedPassword(String newPassword) {
         return passwordEncoder.encode(newPassword);
+    }
+
+    public boolean isMatches(String rawPass, String encodedPass) {
+        return passwordEncoder.matches(rawPass, encodedPass);
     }
 
     public boolean isCorrectNewUser(RegisterForm user,

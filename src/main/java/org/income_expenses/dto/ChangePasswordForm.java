@@ -1,6 +1,7 @@
 package org.income_expenses.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,7 +11,7 @@ public class ChangePasswordForm {
 
     private Long id;
     private String username;
-    @NotBlank(message = "Текущий пароль пользователя не может быть пустым")
+    @NotNull(message = "Текущий пароль пользователя не может быть null")
     private String currentPass;
     @NotBlank(message = "Новый пароль не может быть пустым")
     private String newPassword;

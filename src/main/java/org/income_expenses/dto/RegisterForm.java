@@ -1,6 +1,7 @@
 package org.income_expenses.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.income_expenses.models.MyUser;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,7 +11,7 @@ public class RegisterForm {
 
     @NotBlank(message = "Имя пользователя не может быть пустым")
     private String username;
-    @NotBlank(message = "Пароль пользователя не может быть пустым")
+    @NotNull(message = "Пароль пользователя не может быть null")
     private String password;
     private String confirm;
     @NotBlank(message = "Необходимо указать роль пользователя")

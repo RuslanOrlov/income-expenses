@@ -63,7 +63,8 @@ public class CustomOidcUserService extends OidcUserService {
             }
             MyUser user = MyUser.builder()
                     .username(email)
-                    .password(passwordEncoder.encode("1"))
+                    .password("*")
+                    //.password(passwordEncoder.encode(""))
                     .role("USER")
                     .email(email)
                     .accountNonLocked(true)

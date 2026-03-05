@@ -54,14 +54,21 @@ public class SettingsController {
     @GetMapping("/change-password")
     public String openChangePasswordForm(Model model,
                                          @AuthenticationPrincipal MyUser user) {
+
+        ChangePasswordForm form = ChangePasswordForm.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .currentPass("*".equals(user.getPassword()) ? user.getPassword() : null)
+                .role(user.getRole())
+                .email(user.getEmail())
+                .mode("user")
+                .build();
+
         model.addAttribute("user",
-                ChangePasswordForm.builder()
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .role(user.getRole())
-                        .email(user.getEmail())
-                        .mode("user")
-                        .build());
+                form);
+
+        log.info("--- ChangePasswordForm (GET) = {}", form);
+
         model.addAttribute("returnToWhenGet", "/settings/user-profile");
         model.addAttribute("returnToWhenPost", "/settings/change-password");
 
@@ -74,6 +81,8 @@ public class SettingsController {
             @AuthenticationPrincipal MyUser currentUser,
             @Valid @ModelAttribute("user") ChangePasswordForm form,
             BindingResult errors) {
+
+        log.info("--- ChangePasswordForm (POST) = {}", form);
 
         if ( !userService.isCorrectNewPassword(
                 currentUser.getId(),
@@ -141,7 +150,7 @@ public class SettingsController {
         return (int) totalElements / pageSize + 1;
     }
 
-    private boolean isChangedProperties(MyUser user) {
+    private boolean isChangedUserProperties(MyUser user) {
         // Флаг изменений в настройках пользователя
         boolean isChanged = false;
 
@@ -181,12 +190,12 @@ public class SettingsController {
         return isChanged;
     }
 
-    // Методы управления списком пользователей
+    // Методы управления списком пользователей и отдельными пользователями
     @GetMapping("/users")
     public String getUsers(Model model, @AuthenticationPrincipal MyUser currentUser) {
         // Обновляем настройки текущего пользователю
         // и сохраняем его, если настройки изменились
-        if (isChangedProperties(currentUser)) {
+        if (isChangedUserProperties(currentUser)) {
             userService.saveUser(currentUser);
         }
 
@@ -215,7 +224,7 @@ public class SettingsController {
                 ChangePasswordForm.builder()
                         .id(user.getId())
                         .username(user.getUsername())
-                        .currentPass("*")   // формальное значение, чтобы избежать проверки на пустое поле
+                        .currentPass("*")   // формальное значение, чтобы избежать проверки на null значение
                         .role(user.getRole())
                         .email(user.getEmail())
                         .mode("admin")
