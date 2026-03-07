@@ -63,11 +63,12 @@ public class CustomOidcUserService extends OidcUserService {
             }
             MyUser user = MyUser.builder()
                     .username(email)
-                    .password("*")
-                    //.password(passwordEncoder.encode(""))
+                    .password("*") // ???
                     .role("USER")
                     .email(email)
                     .accountNonLocked(true)
+                    .originalAccountType("GOOGLE")
+                    .accountType("GOOGLE")
                     .attributes(oidcUser.getAttributes())
                     .claims(oidcUser.getClaims())
                     .userInfo(oidcUser.getUserInfo())

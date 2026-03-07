@@ -22,6 +22,8 @@ public class DataLoader implements CommandLineRunner {
                 .role("USER")
                 .email("user1@google.com")
                 .accountNonLocked(true)
+                .originalAccountType("LOCAL")
+                .accountType("LOCAL")
                 .build());
         repo.save(MyUser.builder()
                 .username("user2")
@@ -29,6 +31,8 @@ public class DataLoader implements CommandLineRunner {
                 .role("USER")
                 .email("user2@google.com")
                 .accountNonLocked(true)
+                .originalAccountType("LOCAL")
+                .accountType("LOCAL")
                 .build());
         repo.save(MyUser.builder()
                 .username("admin1")
@@ -36,6 +40,8 @@ public class DataLoader implements CommandLineRunner {
                 .role("ADMIN")
                 .email("admin1@google.com")
                 .accountNonLocked(true)
+                .originalAccountType("LOCAL")
+                .accountType("LOCAL")
                 .build());
     }
 }

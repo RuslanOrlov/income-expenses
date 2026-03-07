@@ -62,6 +62,7 @@ public class SettingsController {
                 .role(user.getRole())
                 .email(user.getEmail())
                 .mode("user")
+                .accountType(user.getAccountType())
                 .build();
 
         model.addAttribute("user",
@@ -87,12 +88,15 @@ public class SettingsController {
         if ( !userService.isCorrectNewPassword(
                 currentUser.getId(),
                 form,
-                errors, model, form.getMode()) ) {
+                errors, model, form.getMode(), form.getAccountType()) ) {
             model.addAttribute("returnToWhenGet", "/settings/user-profile");
             model.addAttribute("returnToWhenPost", "/settings/change-password");
             return "user-password-change";
         }
         currentUser.setPassword(userService.getEncodedPassword(form.getNewPassword()));
+        if ("GOOGLE".equals(currentUser.getAccountType())) {
+            currentUser.setAccountType("LOCAL");
+        }
 
         userService.saveUser(currentUser);
 
@@ -228,6 +232,7 @@ public class SettingsController {
                         .role(user.getRole())
                         .email(user.getEmail())
                         .mode("admin")
+                        .accountType(user.getAccountType())
                         .build());
         model.addAttribute("returnToWhenGet", "/settings/users");
         model.addAttribute("returnToWhenPost", "/settings/users/change-password");
@@ -244,7 +249,7 @@ public class SettingsController {
         if ( !userService.isCorrectNewPassword(
                 form.getId(),
                 form,
-                errors, model, form.getMode()) ) {
+                errors, model, form.getMode(), form.getAccountType()) ) {
             model.addAttribute("returnToWhenGet", "/settings/users");
             model.addAttribute("returnToWhenPost", "/settings/users/change-password");
             return "user-password-change";
@@ -252,6 +257,10 @@ public class SettingsController {
 
         MyUser user = userService.getUserById(form.getId());
         user.setPassword(userService.getEncodedPassword(form.getNewPassword()));
+        if ("GOOGLE".equals(user.getAccountType())) {
+            user.setAccountType("LOCAL");
+        }
+
         userService.saveUser(user);
 
         return "redirect:/settings/users";

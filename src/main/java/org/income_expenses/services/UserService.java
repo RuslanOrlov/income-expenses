@@ -56,17 +56,18 @@ public class UserService {
     public boolean isCorrectNewPassword(Long id,
                                         ChangePasswordForm form,
                                         BindingResult errors,
-                                        Model model, String mode) {
+                                        Model model, String mode, String accountType) {
         MyUser myUser = getUserById(id);
 
-        if ( mode.equals("admin") && (errors.hasErrors() || !form.isConfirmEqualsNewPassword()) ) {
+        if (  ("admin".equals(mode) || "GOOGLE".equals(accountType)) &&
+                (errors.hasErrors() || !form.isConfirmEqualsNewPassword())  ) {
             // Новый пароль и подтверждение пароля не совпадают
             if (!form.isConfirmEqualsNewPassword())
                 model.addAttribute("confirmNewPasswordError", true);
             return false;
         }
 
-        if ( mode.equals("user") &&
+        if ( mode.equals("user") && "LOCAL".equals(accountType) &&
                 ( errors.hasErrors() ||
                         !form.isConfirmEqualsNewPassword() ||
                         ( !"*".equals(form.getCurrentPass()) &&

@@ -42,6 +42,10 @@ public class MyUser implements UserDetails, OidcUser {
     private String email;
     @Column(name = "account_non_locked", nullable = false)
     private boolean accountNonLocked = true;
+    @Column(name = "original_account_type", nullable = false)
+    private String originalAccountType;
+    @Column(name = "account_type", nullable = false)
+    private String accountType;
 
     // Поля управления постраничным просмотром данных пользователем
     @Column(name = "cur_page", nullable = false)

@@ -30,6 +30,8 @@ public class RegisterForm {
                 .role(role != null && !role.isEmpty() ? role : "USER")
                 .email(email)
                 .accountNonLocked(true)
+                .originalAccountType("LOCAL")
+                .accountType("LOCAL")
                 .build();
     }
 
@@ -40,6 +42,8 @@ public class RegisterForm {
                 .role(role != null && !role.isEmpty() ? role : "USER")
                 .email(email)
                 .accountNonLocked(true)
+                .originalAccountType("LOCAL")
+                .accountType("LOCAL")
                 .build();
     }
 }
