@@ -50,14 +50,7 @@ public class FinanceController {
     @PostMapping("/wallet/create")
     public String createWallet(@RequestParam("walletName") String walletName,
                                @AuthenticationPrincipal MyUser currentUser) {
-        FamilyWallet wallet = new FamilyWallet();
-
-        wallet.setOwner(currentUser);
-        wallet.setName(walletName);
-        wallet.setCreatedBy(currentUser);
-        wallet.setCreatedAt(LocalDateTime.now());
-
-        financeService.saveWallet(wallet);
+        financeService.createWallet(walletName, currentUser);
 
         return "redirect:/finance/wallet";
     }
