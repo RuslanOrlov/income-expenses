@@ -2,7 +2,7 @@ package org.income_expenses.dev;
 
 import lombok.RequiredArgsConstructor;
 import org.income_expenses.models.MyUser;
-import org.income_expenses.repositories.UserRepository;
+import org.income_expenses.repositories.MyUserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
-    private final UserRepository repo;
+    private final MyUserRepository repo;
     private final PasswordEncoder passwordEncoder;
 
     @Override

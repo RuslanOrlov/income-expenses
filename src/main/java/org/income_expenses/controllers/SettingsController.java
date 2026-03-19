@@ -27,8 +27,8 @@ public class SettingsController {
     private final SessionService sessionService;
 
     @GetMapping
-    public String getSettings() {
-        return "settings";
+    public String settings() {
+        return "home-page-of-settings";
     }
 
     // Методы управления доступом к профилю своего

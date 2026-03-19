@@ -3,7 +3,7 @@ package org.income_expenses.config;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.income_expenses.models.MyUser;
-import org.income_expenses.repositories.UserRepository;
+import org.income_expenses.repositories.MyUserRepository;
 import org.income_expenses.services.CustomOidcUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,11 +77,11 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer ignoringCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**");
+        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/images/**");
     }
 
     @Bean
-    UserDetailsService userDetailsService(UserRepository userRepository) {
+    UserDetailsService userDetailsService(MyUserRepository userRepository) {
         return username -> {
             MyUser myUser = userRepository.findByUsernameOrEmail(username, username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));

@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,17 +23,19 @@ public class FamilyWallet {
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private MyUser owner;
 
-    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
-    private List<WalletTransaction> transactions;
+    private String name;
 
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
-    private List<WalletMember> members;
+    private List<WalletTransaction> transactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
-    private List<WalletHistory> historyRecords;
+    private List<WalletMember> members = new ArrayList<>();
+
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
+    private List<WalletHistory> historyRecords = new ArrayList<>();
 
     @Column(precision = 19, scale = 2)
-    private BigDecimal totalAmount;
+    private BigDecimal totalAmount = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", referencedColumnName = "id")

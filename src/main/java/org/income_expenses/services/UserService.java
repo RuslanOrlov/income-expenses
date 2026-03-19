@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.ChangePasswordForm;
 import org.income_expenses.dto.RegisterForm;
 import org.income_expenses.models.MyUser;
-import org.income_expenses.repositories.UserRepository;
+import org.income_expenses.repositories.MyUserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
-    final UserRepository userRepository;
+    final MyUserRepository userRepository;
     final PasswordEncoder passwordEncoder;
 
     public List<MyUser> users() {
