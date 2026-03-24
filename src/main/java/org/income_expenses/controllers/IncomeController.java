@@ -36,7 +36,7 @@ public class IncomeController {
     }
 
     // Методы управления постраничным просмотром списка пользователей
-    @GetMapping("/finance/income/prev")
+    @GetMapping("/prev")
     public String prevPageUsers(@AuthenticationPrincipal MyUser currentUser) {
         // Изменяем текущую страницу И сохраняем текущего пользователя
         if (currentUser.getCurPage() > 1) {
@@ -48,7 +48,7 @@ public class IncomeController {
         return "redirect:/finance/income";
     }
 
-    @GetMapping("/finance/income/next")
+    @GetMapping("/next")
     public String nextPageUsers(@AuthenticationPrincipal MyUser currentUser) {
         // Изменяем текущую страницу пользователя
         if (currentUser.getCurPage() < currentUser.getTotalPages()) {
@@ -67,7 +67,7 @@ public class IncomeController {
         return "redirect:/finance/income";
     }
 
-    @PostMapping("/finance/income/change-page-size")
+    @PostMapping("/change-page-size")
     public String changePageSizeUsers(@ModelAttribute("currentUser") MyUser user,
                                       @AuthenticationPrincipal MyUser currentUser) {
         currentUser.setPageSize(user.getPageSize());
@@ -141,7 +141,7 @@ public class IncomeController {
         return "transactions-list";
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public String getIncomeTransactionCard(@PathVariable("id") Long id, Model model) {
         WalletTransaction income = incomeService.getIncomeCard(id);
         model.addAttribute("income", income);
@@ -165,7 +165,7 @@ public class IncomeController {
         return "redirect:/finance/income";
     }
 
-    @GetMapping("/{id}/delete")
+    @GetMapping("/{id:\\d+}/delete")
     public String deleteIncome(@PathVariable("id") Long id) {
         incomeService.deleteIncome(id);
         return "redirect:/finance/income";
