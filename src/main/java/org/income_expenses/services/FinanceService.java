@@ -27,7 +27,7 @@ public class FinanceService {
         return wallet;
     }
 
-    public void createWallet(String walletName, MyUser currentUser) {
+    public FamilyWallet createWallet(String walletName, MyUser currentUser) {
         FamilyWallet wallet = new FamilyWallet();
 
         wallet.setOwner(currentUser);
@@ -46,6 +46,8 @@ public class FinanceService {
         wallet.getMembers().add(member);
 
         this.saveWallet(wallet);
+
+        return wallet;
     }
 
     public FamilyWallet saveWallet(FamilyWallet wallet) {

@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping(value = "/finance")
+//@SessionAttributes("wallet")
 public class FinanceController {
 
     private final FinanceService financeService;
@@ -24,6 +25,11 @@ public class FinanceController {
     public MyUser currentUser(@AuthenticationPrincipal MyUser user) {
         return user;
     }
+
+    /*@ModelAttribute("wallet")
+    public FamilyWallet wallet() {
+        return new FamilyWallet();
+    }*/
 
     @GetMapping
     public String financePage() {
