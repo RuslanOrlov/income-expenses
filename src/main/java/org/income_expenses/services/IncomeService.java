@@ -1,7 +1,6 @@
 package org.income_expenses.services;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
