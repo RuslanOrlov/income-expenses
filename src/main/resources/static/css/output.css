@@ -995,9 +995,6 @@
   .bg-primary {
     background-color: var(--primary);
   }
-  .bg-red-600 {
-    background-color: var(--color-red-600);
-  }
   .bg-secondary {
     background-color: var(--secondary);
   }
@@ -1560,13 +1557,6 @@
       }
     }
   }
-  .hover\:border-red-700 {
-    &:hover {
-      @media (hover: hover) {
-        border-color: var(--color-red-700);
-      }
-    }
-  }
   .hover\:bg-blue-700 {
     &:hover {
       @media (hover: hover) {
@@ -1609,13 +1599,6 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--primary-hover);
-      }
-    }
-  }
-  .hover\:bg-red-700 {
-    &:hover {
-      @media (hover: hover) {
-        background-color: var(--color-red-700);
       }
     }
   }
@@ -1704,11 +1687,6 @@
       border-color: var(--primary-focus);
     }
   }
-  .focus\:border-red-800 {
-    &:focus {
-      border-color: var(--color-red-800);
-    }
-  }
   .focus\:bg-destructive-focus\/10 {
     &:focus {
       background-color: var(--destructive-focus);
@@ -1735,11 +1713,6 @@
   .focus\:bg-primary-focus {
     &:focus {
       background-color: var(--primary-focus);
-    }
-  }
-  .focus\:bg-red-800 {
-    &:focus {
-      background-color: var(--color-red-800);
     }
   }
   .focus\:bg-secondary-hover {

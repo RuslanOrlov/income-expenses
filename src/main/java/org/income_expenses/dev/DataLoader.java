@@ -2,16 +2,22 @@ package org.income_expenses.dev;
 
 import lombok.RequiredArgsConstructor;
 import org.income_expenses.models.MyUser;
+import org.income_expenses.models.TransactionCategory;
+import org.income_expenses.models.TransactionType;
 import org.income_expenses.repositories.MyUserRepository;
+import org.income_expenses.repositories.TransactionTypeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
     private final MyUserRepository repo;
+    private final TransactionTypeRepository transactionTypeRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -43,6 +49,18 @@ public class DataLoader implements CommandLineRunner {
                 .originalAccountType("LOCAL")
                 .accountType("LOCAL")
                 .build());
+        transactionTypeRepository
+                .save(TransactionType.builder()
+                        .transactionTypeName("Текущий остаток денег")
+                        .category(TransactionCategory.INCOME)
+                        .createdAt(LocalDateTime.now())
+                        .build());
+        transactionTypeRepository
+                .save(TransactionType.builder()
+                        .transactionTypeName("Пенсия / пособие")
+                        .category(TransactionCategory.INCOME)
+                        .createdAt(LocalDateTime.now())
+                        .build());
     }
 }
 

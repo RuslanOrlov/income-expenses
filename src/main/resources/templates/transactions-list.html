@@ -218,28 +218,26 @@
                                                 <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-40 z-20 bg-dropdown border border-dropdown-line divide-y divide-dropdown-divider shadow-2xl rounded-lg p-1" role="menu" aria-orientation="vertical" aria-labelledby="hs-table-dropdown-1">
                                                     <div class="py-2 first:pt-0 last:pb-0">
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:href="@{/settings/users/{id}(id=${user.getId()})}">
-                                                            Открыть профиль
+                                                           th:href="@{#}">
+                                                            Открыть транзакцию
                                                         </a>
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:href="@{/settings/users/{id}/change-password(id=${user.getId()})}">
-                                                            Изменить пароль
+                                                           th:href="@{#}">
+                                                            Изменить транзакцию
                                                         </a>
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:if="${user.isAccountNonLocked()}"
-                                                           th:href="@{/settings/users/{id}/confirm-user-locking(id=${user.getId()})}">
-                                                            Заблокировать
+                                                           th:href="@{#}">
+                                                            Операция ...
                                                         </a>
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:if="${!user.isAccountNonLocked()}"
-                                                           th:href="@{/settings/users/{id}/confirm-user-locking(id=${user.getId()})}">
-                                                            Разблокировать
+                                                           th:href="@{#}">
+                                                            Операция ...
                                                         </a>
                                                     </div>
                                                     <div class="py-2 first:pt-0 last:pb-0">
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-destructive hover:bg-destructive-hover/10 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-destructive-focus/10"
-                                                           th:href="@{/settings/users/{id}/confirm-user-deleting(id=${user.getId()})}">
-                                                            Удалить
+                                                           th:href="@{/finance/income/{id}/confirm-transaction-deleting(id=${transaction.getId()})}">
+                                                            Удалить транзакцию
                                                         </a>
                                                     </div>
                                                 </div>

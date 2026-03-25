@@ -25,7 +25,7 @@ public class FamilyWallet {
 
     private String name;
 
-    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL/*, orphanRemoval = true*/)
     private List<WalletTransaction> transactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)

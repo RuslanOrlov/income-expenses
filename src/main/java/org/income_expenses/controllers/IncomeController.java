@@ -2,6 +2,8 @@ package org.income_expenses.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.income_expenses.dto.TransactionDto;
 import org.income_expenses.models.FamilyWallet;
 import org.income_expenses.models.MyUser;
 import org.income_expenses.models.WalletTransaction;
@@ -12,10 +14,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping(value = "/finance/income")
@@ -31,8 +35,8 @@ public class IncomeController {
     }
 
     @ModelAttribute("totalElementsList")
-    public long totalElements() {
-        return incomeService.transactionsCount();
+    public long totalElements(@AuthenticationPrincipal MyUser currentUser) {
+        return calculateTotalElements(currentUser);
     }
 
     // Методы управления постраничным просмотром списка пользователей
@@ -75,8 +79,9 @@ public class IncomeController {
         return "redirect:/finance/income";
     }
 
-    private long calculateTotalElements() {
-        return incomeService.transactionsCount();
+    private long calculateTotalElements(MyUser currentUser) {
+        FamilyWallet wallet = financeService.findWalletByOwner(currentUser);
+        return incomeService.incomeTransactionsCount(currentUser, wallet);
     }
 
     private int calculateTotalPages(long totalElements, int pageSize) {
@@ -95,7 +100,7 @@ public class IncomeController {
         // - размер страницы в списке (если необходимо, сразу устанавливаем пользователю)
         // - количество страниц в списке
         // - текущую страницу
-        long totalElements = calculateTotalElements();
+        long totalElements = calculateTotalElements(user);
         if (user.getPageSize() < 1) {
             user.setPageSize(1);
             isChanged = true;
@@ -136,7 +141,10 @@ public class IncomeController {
         }
 
         FamilyWallet wallet = financeService.findWalletByOwner(currentUser);
-        List<WalletTransaction> transactions = incomeService.getIncomeTransactions(currentUser, wallet);
+        List<WalletTransaction> transactions = incomeService.getIncomeTransactions(
+                currentUser, wallet,
+                currentUser.getCurPage() > 0 ? currentUser.getCurPage() - 1 : currentUser.getCurPage(),
+                currentUser.getPageSize());
         model.addAttribute("transactions", transactions);
         return "transactions-list";
     }
@@ -149,21 +157,39 @@ public class IncomeController {
     }
 
     @GetMapping("/create")
-    public String openCreateForm() {
+    public String openCreateForm(Model model) {
+        model.addAttribute("types", incomeService.getIncomeTransactionTypeList());
         return "transaction-create";
     }
 
     @PostMapping("/create")
-    public String createIncome(@Valid WalletTransaction walletTransaction,
-                               BindingResult bindingResult) {
+    public String createIncome(@Valid TransactionDto transaction,
+                               BindingResult bindingResult,
+                               @AuthenticationPrincipal MyUser currentUser) {
         if (bindingResult.hasErrors()) {
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                log.info("--- error {}", error.getDefaultMessage());
+            }
             return  "transaction-create";
         }
 
-        incomeService.createIncomeTransaction(walletTransaction);
+        incomeService.createIncomeTransaction(transaction, currentUser);
 
         return "redirect:/finance/income";
     }
+
+    @GetMapping("/{id:\\d+}/confirm-transaction-deleting")
+    public String userDeleting(@PathVariable("id") Long id, Model model) {
+        WalletTransaction income = incomeService.getIncomeCard(id);
+
+        model.addAttribute("user", income.getWhoPerformed().getUsername());
+        model.addAttribute("action", "deleting");
+        model.addAttribute("actionUri", "/finance/income/" + id + "/delete");
+        model.addAttribute("returnTo", "/finance/income");
+
+        return "confirm-action-on-transaction";
+    }
+
 
     @GetMapping("/{id:\\d+}/delete")
     public String deleteIncome(@PathVariable("id") Long id) {
