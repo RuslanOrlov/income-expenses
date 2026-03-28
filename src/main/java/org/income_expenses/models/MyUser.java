@@ -46,14 +46,8 @@ public class MyUser implements UserDetails, OidcUser {
     private String accountType;
 
     // Поля управления постраничным просмотром данных пользователем
-    @Column(name = "cur_page", nullable = false)
-    private int curPage;
     @Column(name = "page_size", nullable = false)
     private int pageSize;
-    @Column(name = "total_pages", nullable = false)
-    private int totalPages;
-    @Column(name = "total_elements", nullable = false)
-    private long totalElements;
 
     // Поля интрефейса OAuth2User и OidcUser, которые НЕ сохраняются в БД
     @Transient

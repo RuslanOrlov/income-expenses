@@ -6,6 +6,7 @@ import org.income_expenses.dto.ChangePasswordForm;
 import org.income_expenses.dto.RegisterForm;
 import org.income_expenses.models.MyUser;
 import org.income_expenses.repositories.MyUserRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,9 +32,9 @@ public class UserService {
         return userRepository.findAll(Sort.by("id"));
     }
 
-    public List<MyUser> users(int page, int size) {
+    public Page<MyUser> users(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
-        return userRepository.findAll(pageable).getContent();
+        return userRepository.findAll(pageable);
     }
 
     public long usersCount() {

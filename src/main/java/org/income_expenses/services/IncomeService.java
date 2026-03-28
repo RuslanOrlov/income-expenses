@@ -31,12 +31,12 @@ public class IncomeService {
     private final TransactionTypeRepository transactionTypeRepository;
     private final WalletMemberRepository walletMemberRepository;
 
-    public List<WalletTransaction> getIncomeTransactions(MyUser currentUser, FamilyWallet wallet,
+    public Page<WalletTransaction> getIncomeTransactions(MyUser currentUser, FamilyWallet wallet,
                                                          int curPage, int pageSize) {
         Pageable pageable = PageRequest.of(curPage, pageSize, Sort.by("id"));
         Page<WalletTransaction> page =
                 walletTransactionRepository.getIncomeTransactions(currentUser.getId(), wallet.getId(), pageable);
-        return page.getContent();
+        return page;
     }
 
     public WalletTransaction getIncomeCard(Long id) {
