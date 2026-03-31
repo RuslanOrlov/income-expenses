@@ -9,9 +9,7 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -44,6 +42,10 @@ public class MyUser implements UserDetails, OidcUser {
     private String originalAccountType;
     @Column(name = "account_type", nullable = false)
     private String accountType;
+
+    // Поле для доступа к списку кошельков пользователя
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<WalletMember> wallets = new ArrayList<>();
 
     // Поля управления постраничным просмотром данных пользователем
     @Column(name = "page_size", nullable = false)

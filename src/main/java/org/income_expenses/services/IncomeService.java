@@ -1,5 +1,6 @@
 package org.income_expenses.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,10 @@ public class IncomeService {
     private final WalletTransactionRepository walletTransactionRepository;
     private final TransactionTypeRepository transactionTypeRepository;
     private final WalletMemberRepository walletMemberRepository;
+
+    public FamilyWallet getFamilyWalletById(Long id) {
+        return familyWalletRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    }
 
     public Page<WalletTransaction> getIncomeTransactions(MyUser currentUser, FamilyWallet wallet,
                                                          int curPage, int pageSize) {

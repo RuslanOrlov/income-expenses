@@ -17,6 +17,10 @@ public class FinanceService {
 
     private final FamilyWalletRepository walletRepository;
 
+    public FamilyWallet getFamilyWalletById(Long id) {
+        return walletRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    }
+
     public boolean existsWalletByOwner(MyUser currentUser) {
         return walletRepository.existsByOwner(currentUser);
     }

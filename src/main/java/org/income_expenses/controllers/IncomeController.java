@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
 import org.income_expenses.models.FamilyWallet;
 import org.income_expenses.models.MyUser;
+import org.income_expenses.models.WalletMember;
 import org.income_expenses.models.WalletTransaction;
+import org.income_expenses.repositories.WalletMemberRepository;
 import org.income_expenses.services.FinanceService;
 import org.income_expenses.services.IncomeService;
 import org.income_expenses.services.UserService;
@@ -19,6 +21,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -29,11 +32,21 @@ public class IncomeController {
     private final IncomeService incomeService;
     private final FinanceService financeService;
     private final UserService userService;
+    private final WalletMemberRepository walletMemberRepository;
 
     // Определение текущего пользователя как общего атрибута модели
     @ModelAttribute("currentUser")
     public MyUser currentUser(@AuthenticationPrincipal MyUser user) {
+        user.setWallets(walletMemberRepository.findAllByMember(user));
         return user;
+    }
+
+    @ModelAttribute("userWallets")
+    public List<FamilyWallet> wallets(@AuthenticationPrincipal MyUser user) {
+        return walletMemberRepository.findAllByMember(user)
+                .stream()
+                .map(item -> item.getWallet())
+                .collect(Collectors.toList());
     }
 
     // Метод управления размером страницы пользователя
@@ -49,13 +62,25 @@ public class IncomeController {
     @GetMapping
     public String getIncomeTransactions(Model model,
                                         @AuthenticationPrincipal MyUser currentUser,
-                                        @RequestParam(value = "page", defaultValue = "0") int curPage) {
+                                        @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+                                        @RequestParam(value = "walletId", required = false) Long walletId) {
+        boolean walletSelected = (walletId != null);
+        model.addAttribute("walletSelected", walletSelected);
 
-        FamilyWallet wallet = financeService.findWalletByOwner(currentUser);
-        Page<WalletTransaction> page = incomeService.getIncomeTransactions(
-                currentUser, wallet, curPage, currentUser.getPageSize());
-        model.addAttribute("transactions", page.getContent());
-        model.addAttribute("page", page);
+        if (walletSelected) {
+            FamilyWallet wallet = financeService.getFamilyWalletById(walletId);
+
+            Page<WalletTransaction> page = incomeService.getIncomeTransactions(
+                    currentUser, wallet, curPage, currentUser.getPageSize());
+
+            model.addAttribute("transactions", page.getContent());
+            model.addAttribute("page", page);
+        } else {
+            model.addAttribute("transactions", List.of());
+            model.addAttribute("page", Page.empty());
+        }
+        model.addAttribute("selectedWalletId", walletId);
+
         return "transactions-list";
     }
 
