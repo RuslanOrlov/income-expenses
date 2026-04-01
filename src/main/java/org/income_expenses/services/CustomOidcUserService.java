@@ -68,6 +68,7 @@ public class CustomOidcUserService extends OidcUserService {
                     .accountNonLocked(true)
                     .originalAccountType("GOOGLE")
                     .accountType("GOOGLE")
+                    .pageSize(1)
                     .attributes(oidcUser.getAttributes())
                     .claims(oidcUser.getClaims())
                     .userInfo(oidcUser.getUserInfo())
