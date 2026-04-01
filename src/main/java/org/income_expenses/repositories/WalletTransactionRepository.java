@@ -40,6 +40,5 @@ public interface WalletTransactionRepository extends JpaRepository<WalletTransac
                     "WHERE wt.wallet_id = :walletId " +
                         "AND (fw.owner_id = :userId OR wm.member_id = :userId) " +
                         "AND wt.category = 'INCOME'" )
-    long incomeTransactionsCount(@Param("userId") Long userId,
-                           @Param("walletId") Long walletId);
+    long incomeTransactionsCount(@Param("userId") Long userId, @Param("walletId") Long walletId);
 }

@@ -56,7 +56,7 @@
                     </h2>
                 </div>
 
-                <form th:method="post" th:action="@{/finance/income/create}">
+                <form th:method="post" th:action="@{/finance/income/create(walletId=${selectedWalletId})}">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 

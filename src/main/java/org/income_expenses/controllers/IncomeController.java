@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
 import org.income_expenses.models.FamilyWallet;
 import org.income_expenses.models.MyUser;
-import org.income_expenses.models.WalletMember;
 import org.income_expenses.models.WalletTransaction;
 import org.income_expenses.repositories.WalletMemberRepository;
 import org.income_expenses.services.FinanceService;
@@ -52,10 +51,11 @@ public class IncomeController {
     // Метод управления размером страницы пользователя
     @PostMapping("/change-page-size")
     public String changePageSizeUsers(@ModelAttribute("currentUser") MyUser user,
-                                      @AuthenticationPrincipal MyUser currentUser) {
+                                      @AuthenticationPrincipal MyUser currentUser,
+                                      @RequestParam(value = "walletId", required = false) Long walletId) {
         currentUser.setPageSize(user.getPageSize());
         userService.saveUser(currentUser);
-        return "redirect:/finance/income";
+        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId : "");
     }
 
     // Методы управления списком приходных транзакций
@@ -79,6 +79,7 @@ public class IncomeController {
             model.addAttribute("transactions", List.of());
             model.addAttribute("page", Page.empty());
         }
+
         model.addAttribute("selectedWalletId", walletId);
 
         return "transactions-list";
@@ -92,15 +93,17 @@ public class IncomeController {
     }
 
     @GetMapping("/create")
-    public String openCreateForm(Model model) {
+    public String openCreateForm(Model model, @RequestParam(value = "walletId", required = false) Long walletId) {
         model.addAttribute("types", incomeService.getIncomeTransactionTypeList());
+        model.addAttribute("selectedWalletId", walletId);
         return "transaction-create";
     }
 
     @PostMapping("/create")
     public String createIncome(@Valid TransactionDto transaction,
                                BindingResult bindingResult,
-                               @AuthenticationPrincipal MyUser currentUser) {
+                               @AuthenticationPrincipal MyUser currentUser,
+                               @RequestParam(value = "walletId", required = false) Long walletId) {
         if (bindingResult.hasErrors()) {
             for (ObjectError error : bindingResult.getAllErrors()) {
                 log.info("--- error {}", error.getDefaultMessage());
@@ -110,25 +113,27 @@ public class IncomeController {
 
         incomeService.createIncomeTransaction(transaction, currentUser);
 
-        return "redirect:/finance/income";
+        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId : "");
     }
 
     @GetMapping("/{id:\\d+}/confirm-transaction-deleting")
-    public String userDeleting(@PathVariable("id") Long id, Model model) {
+    public String userDeleting(@PathVariable("id") Long id, Model model,
+                               @RequestParam(value = "walletId", required = false) Long walletId) {
         WalletTransaction income = incomeService.getIncomeCard(id);
 
         model.addAttribute("user", income.getWhoPerformed().getUsername());
         model.addAttribute("action", "deleting");
-        model.addAttribute("actionUri", "/finance/income/" + id + "/delete");
-        model.addAttribute("returnTo", "/finance/income");
+        model.addAttribute("actionUri", "/finance/income/" + id + "/delete" /*+ param*/);
+        model.addAttribute("returnTo", "/finance/income" /*+ param*/);
+        model.addAttribute("selectedWalletId", walletId);
 
         return "confirm-action-on-transaction";
     }
 
 
     @GetMapping("/{id:\\d+}/delete")
-    public String deleteIncome(@PathVariable("id") Long id) {
+    public String deleteIncome(@PathVariable("id") Long id, @RequestParam(value = "walletId", required = false) Long walletId) {
         incomeService.deleteIncome(id);
-        return "redirect:/finance/income";
+        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId : "");
     }
 }

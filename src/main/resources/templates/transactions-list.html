@@ -89,7 +89,7 @@
                                     <div class="inline-flex gap-x-2">
                                         <a th:classappend="${!walletSelected} ? ' opacity-50 pointer-events-none'"
                                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none"
-                                           th:href="@{/finance/income/create}">
+                                           th:href="@{/finance/income/create(walletId=${selectedWalletId})}">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                             Создать
                                         </a>
@@ -277,7 +277,7 @@
                                                     </div>
                                                     <div class="py-2 first:pt-0 last:pb-0">
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-destructive hover:bg-destructive-hover/10 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-destructive-focus/10"
-                                                           th:href="@{/finance/income/{id}/confirm-transaction-deleting(id=${transaction.getId()})}">
+                                                           th:href="@{/finance/income/{id}/confirm-transaction-deleting(id=${transaction.getId()}, walletId=${selectedWalletId})}">
                                                             Удалить транзакцию
                                                         </a>
                                                     </div>
@@ -300,9 +300,10 @@
                                     </p>
                                     <div class="max-w-sm space-y-3">
                                         <form th:object="${currentUser}"
-                                              th:action="@{/finance/income/change-page-size}"
+                                              th:action="@{/finance/income/change-page-size(walletId=${selectedWalletId})}"
                                               th:method="post">
                                         <select th:field="*{pageSize}"
+                                                th:disabled="${!walletSelected}"
                                                 onchange="this.form.submit()"
                                                 class="py-2 px-3 pe-9 block w-full bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
                                             <option value="1" th:selected="*{pageSize == 1}">1</option>
@@ -316,7 +317,7 @@
                                         </form>
                                     </div>
                                     <p class="text-sm text-muted-foreground-2">
-                                        of <span th:text="${page.totalElements}"></span>
+                                        из <span th:text="${page.totalElements}"></span>
                                     </p>
                                 </div>
 
