@@ -99,6 +99,7 @@
                               th:action="@{${actionUri}}" th:method="get">
 
                             <input type="hidden" name="walletId" th:value="${selectedWalletId}">
+                            <input type="hidden" name="curPage" th:value="${curPage}">
 
                             <button type="submit" th:if="${action == 'deleting'}"
                                     class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">

@@ -38,7 +38,7 @@ public class IncomeService {
 
     public Page<WalletTransaction> getIncomeTransactions(MyUser currentUser, FamilyWallet wallet,
                                                          int curPage, int pageSize) {
-        Pageable pageable = PageRequest.of(curPage, pageSize, Sort.by("id"));
+        Pageable pageable = PageRequest.of(curPage, pageSize, Sort.by("id").descending());
         Page<WalletTransaction> page =
                 walletTransactionRepository.getIncomeTransactions(currentUser.getId(), wallet.getId(), pageable);
         return page;
@@ -93,8 +93,10 @@ public class IncomeService {
 
         familyWalletRepository.save(wallet);
 
-        // В сущности FamilyWallet в аннотации @OneToMany атрибут orphanRemoval = true,
-        // благодаря чему не требуется вызывать операцию удаления (см. нижн. строку кода)
+        // ЕСЛИ бы в сущности FamilyWallet в аннотации @OneToMany для поля transactions был
+        // явным образом инициализирован атрибут orphanRemoval = true, ТО не потребовалось
+        // бы вызывать ниже следующую операцию удаления (см. след. строку кода):
+
         walletTransactionRepository.deleteById(id);
     }
 

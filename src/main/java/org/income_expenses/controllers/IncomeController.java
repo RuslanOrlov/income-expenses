@@ -117,14 +117,16 @@ public class IncomeController {
     }
 
     @GetMapping("/{id:\\d+}/confirm-transaction-deleting")
-    public String userDeleting(@PathVariable("id") Long id, Model model,
+    public String deletingIncomeConfirm(@PathVariable("id") Long id, Model model,
+                               @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                @RequestParam(value = "walletId", required = false) Long walletId) {
         WalletTransaction income = incomeService.getIncomeCard(id);
 
         model.addAttribute("user", income.getWhoPerformed().getUsername());
         model.addAttribute("action", "deleting");
-        model.addAttribute("actionUri", "/finance/income/" + id + "/delete" /*+ param*/);
-        model.addAttribute("returnTo", "/finance/income" /*+ param*/);
+        model.addAttribute("actionUri", "/finance/income/" + id + "/delete");
+        model.addAttribute("returnTo", "/finance/income");
+        model.addAttribute("curPage", curPage);
         model.addAttribute("selectedWalletId", walletId);
 
         return "confirm-action-on-transaction";
@@ -132,8 +134,10 @@ public class IncomeController {
 
 
     @GetMapping("/{id:\\d+}/delete")
-    public String deleteIncome(@PathVariable("id") Long id, @RequestParam(value = "walletId", required = false) Long walletId) {
+    public String deleteIncome(@PathVariable("id") Long id,
+                               @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+                               @RequestParam(value = "walletId", required = false) Long walletId) {
         incomeService.deleteIncome(id);
-        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId : "");
+        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
     }
 }

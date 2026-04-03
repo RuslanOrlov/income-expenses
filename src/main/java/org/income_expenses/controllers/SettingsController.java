@@ -112,7 +112,7 @@ public class SettingsController {
     @GetMapping("/users")
     public String getUsers(Model model,
                            @AuthenticationPrincipal MyUser currentUser,
-                           @RequestParam(value = "page", defaultValue = "0") int curPage) {
+                           @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
 
         Page<MyUser> page = userService.users(
                 curPage, currentUser.getPageSize());
@@ -123,17 +123,22 @@ public class SettingsController {
     }
 
     @GetMapping("/users/{id}")
-    public String getUserById(@PathVariable("id") Long id, Model model) {
+    public String getUserById(@PathVariable("id") Long id, Model model,
+                              @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
+
         model.addAttribute("user", userService.getUserById(id));
         model.addAttribute("returnTo", "/settings/users");
         model.addAttribute("mode", "admin");
+        model.addAttribute("curPage", curPage);
+
         return "user-profile";
     }
 
     @GetMapping("/users/{id}/change-password")
     public String openChangePasswordFormAdminMode(
             @PathVariable("id") Long id,
-            Model model) {
+            Model model,
+            @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
 
         MyUser user = userService.getUserById(id);
 
@@ -149,6 +154,7 @@ public class SettingsController {
                         .build());
         model.addAttribute("returnToWhenGet", "/settings/users");
         model.addAttribute("returnToWhenPost", "/settings/users/change-password");
+        model.addAttribute("curPage", curPage);
 
         return "user-password-change";
     }
@@ -157,7 +163,8 @@ public class SettingsController {
     public String changeUserPasswordAdminMode(
             Model model,
             @Valid @ModelAttribute("user") ChangePasswordForm form,
-            BindingResult errors) {
+            BindingResult errors,
+            @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
 
         if ( !userService.isCorrectNewPassword(
                 form.getId(),
@@ -165,6 +172,7 @@ public class SettingsController {
                 errors, model, form.getMode(), form.getAccountType()) ) {
             model.addAttribute("returnToWhenGet", "/settings/users");
             model.addAttribute("returnToWhenPost", "/settings/users/change-password");
+            model.addAttribute("curPage", curPage);
             return "user-password-change";
         }
 
@@ -176,25 +184,28 @@ public class SettingsController {
 
         userService.saveUser(user);
 
-        return "redirect:/settings/users";
+        return "redirect:/settings/users" + "?curPage=" + curPage;
     }
 
     @GetMapping("/users/{id}/confirm-user-locking")
-    public String userLockingConfirm(@PathVariable("id") Long id, Model model) {
+    public String userLockingConfirm(@PathVariable("id") Long id, Model model,
+                                     @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
         model.addAttribute("user", userService.getUserById(id));
         model.addAttribute("action", "locking");
         model.addAttribute("actionUri", "/settings/users/user-locking");
         model.addAttribute("returnTo", "/settings/users");
+        model.addAttribute("curPage", curPage);
 
         return "confirm-action-on-user";
     }
 
-    @PostMapping("/users/user-locking")
+    @GetMapping("/users/user-locking")
     public String userLocking(@RequestParam("id") Long id,
                               @AuthenticationPrincipal MyUser currentUser,
                               Authentication authentication,
                               HttpServletRequest request,
-                              HttpServletResponse response) {
+                              HttpServletResponse response,
+                              @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
 
         String username = userService.getUserById(id).getUsername();
 
@@ -207,25 +218,28 @@ public class SettingsController {
             sessionService.expireUserSessions(username);
         }
 
-        return "redirect:/settings/users";
+        return "redirect:/settings/users" + "?curPage=" + request.getParameter("curPage");
     }
 
     @GetMapping("/users/{id}/confirm-user-deleting")
-    public String userDeleting(@PathVariable("id") Long id, Model model) {
+    public String userDeleting(@PathVariable("id") Long id, Model model,
+                               @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
         model.addAttribute("user", userService.getUserById(id));
         model.addAttribute("action", "deleting");
         model.addAttribute("actionUri", "/settings/users/user-deleting");
         model.addAttribute("returnTo", "/settings/users");
+        model.addAttribute("curPage", curPage);
 
         return "confirm-action-on-user";
     }
 
-    @PostMapping("/users/user-deleting")
+    @GetMapping("/users/user-deleting")
     public String userDeleting(@RequestParam("id") Long id,
-                              @AuthenticationPrincipal MyUser currentUser,
-                              Authentication authentication,
-                              HttpServletRequest request,
-                              HttpServletResponse response) {
+                               @AuthenticationPrincipal MyUser currentUser,
+                               Authentication authentication,
+                               HttpServletRequest request,
+                               HttpServletResponse response,
+                               @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
 
         String username = userService.getUserById(id).getUsername();
 
@@ -238,7 +252,7 @@ public class SettingsController {
             sessionService.expireUserSessions(username);
         }
 
-        return "redirect:/settings/users";
+        return "redirect:/settings/users" + "?curPage=" + request.getParameter("curPage");
     }
 
 }

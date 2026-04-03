@@ -67,15 +67,14 @@
             <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto">
             -->
                 <div class="relative w-full max-h-full flex flex-col bg-overlay border border-overlay-line rounded-xl pointer-events-auto shadow-xl">
-                    <form class="absolute top-2 end-2">
-                        <button type="submit"
-                                class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-surface text-surface-foreground hover:bg-surface-hover focus:outline-hidden focus:bg-surface-focus disabled:opacity-50 disabled:pointer-events-none" aria-label="Close" data-hs-overlay="#hs-sign-out-alert"
-                                th:formaction="@{${returnTo}}"
-                                th:formmethod="get">
-                            <span class="sr-only">Close</span>
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                        </button>
-                    </form>
+
+                    <a th:href="@{${returnTo}(curPage=${curPage})}"
+                       class="absolute top-2 end-2 size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-surface text-surface-foreground hover:bg-surface-hover focus:outline-hidden focus:bg-surface-focus disabled:opacity-50 disabled:pointer-events-none"
+                       aria-label="Close"
+                       data-hs-overlay="#hs-sign-out-alert">
+                        <span class="sr-only">Close</span>
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </a>
 
                     <div class="p-4 sm:p-10 text-center overflow-y-auto">
                         <!-- Icon -->
@@ -111,14 +110,15 @@
                         </p>
 
                         <form class="mt-6 flex justify-center gap-x-4"
-                              th:action="@{${actionUri}}" th:method="post">
+                              th:action="@{${actionUri}}" th:method="get">
 
                             <input type="hidden" name="id" th:value="${user.getId()}">
+                            <input type="hidden" name="curPage" th:value="${curPage}">
 
                             <button type="submit" th:if="${action == 'locking'}"
                                     class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
                                 <span th:if="${user.isAccountNonLocked()}">Заблокировать</span>
-                                <span th:if="${!user.isAccountNonLocked()}">Разаблокировать</span>
+                                <span th:if="${!user.isAccountNonLocked()}">Разблокировать</span>
                             </button>
                             <button type="submit" th:if="${action == 'deleting'}"
                                     class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
@@ -126,7 +126,7 @@
                             </button>
                             <button type="submit"
                                     class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none" data-hs-overlay="#hs-sign-out-alert"
-                                    th:formaction="@{${returnTo}}"
+                                    th:formaction="@{${returnTo}(curPage=${curPage})}"
                                     th:formmethod="get">
                                 Отменить
                             </button>
