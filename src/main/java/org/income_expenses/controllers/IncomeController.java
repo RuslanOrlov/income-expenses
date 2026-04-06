@@ -94,19 +94,24 @@ public class IncomeController {
 
     @GetMapping("/create")
     public String openCreateForm(Model model, @RequestParam(value = "walletId", required = false) Long walletId) {
+        model.addAttribute("transaction", new TransactionDto());
         model.addAttribute("types", incomeService.getIncomeTransactionTypeList());
         model.addAttribute("selectedWalletId", walletId);
         return "transaction-create";
     }
 
     @PostMapping("/create")
-    public String createIncome(@Valid TransactionDto transaction,
+    public String createIncome(@ModelAttribute("transaction") @Valid TransactionDto transaction,
                                BindingResult bindingResult,
                                @AuthenticationPrincipal MyUser currentUser,
-                               @RequestParam(value = "walletId", required = false) Long walletId) {
+                               @RequestParam(value = "walletId", required = false) Long walletId,
+                               Model model) {
         if (bindingResult.hasErrors()) {
             for (ObjectError error : bindingResult.getAllErrors()) {
                 log.info("--- error {}", error.getDefaultMessage());
+                model.addAttribute("transaction", transaction);
+                model.addAttribute("types", incomeService.getIncomeTransactionTypeList());
+                model.addAttribute("selectedWalletId", walletId);
             }
             return  "transaction-create";
         }

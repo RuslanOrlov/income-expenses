@@ -1,5 +1,8 @@
 package org.income_expenses.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.income_expenses.models.TransactionCategory;
 import org.income_expenses.models.TransactionType;
@@ -9,9 +12,18 @@ import java.time.LocalDateTime;
 
 @Data
 public class TransactionDto {
-    private int amount;
+    @NotNull(message = "Сумма не может быть пустой")
+    @Positive(message = "Сумма должна быть указана > 0")
+    private Integer amount;
+
+    @NotNull(message = "Дата не может быть пустой")
+    @PastOrPresent(message = "Дата не может быть в будущем")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime whenPerformed;
+
+    @NotNull(message = "Тип транзакции должен быть указан")
     private TransactionType transactionType;
+
+    @NotNull(message = "Категория транзакции должна быть указана")
     private TransactionCategory category;
 }

@@ -56,7 +56,7 @@
                     </h2>
                 </div>
 
-                <form th:method="post" th:action="@{/finance/income/create(walletId=${selectedWalletId})}">
+                <form th:method="post" th:action="@{/finance/income/create(walletId=${selectedWalletId})}" th:object="${transaction}">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
@@ -68,8 +68,11 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <input id="amount" type="number" name="amount" placeholder="сумма транзакции"
+                            <input id="amount" type="number" th:field="*{amount}" placeholder="сумма транзакции"
                                    class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
+                            <div th:if="${#fields.hasErrors('amount')}">
+                                <span th:errors="*{amount}" class="text-red-500"></span>
+                            </div>
                         </div>
                         <!-- End Col -->
 
@@ -81,9 +84,10 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <div class="sm:flex">
-                                <input id="whenPerformed" type="datetime-local" name="whenPerformed" placeholder="дата транзакции"
-                                       class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line text-foreground placeholder:text-muted-foreground-1 shadow-2xs -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg sm:text-sm relative focus:z-10 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
+                            <input id="whenPerformed" type="datetime-local" th:field="*{whenPerformed}" placeholder="дата транзакции"
+                                   class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
+                            <div th:if="${#fields.hasErrors('whenPerformed')}">
+                                <span th:errors="*{whenPerformed}" class="text-red-500"></span>
                             </div>
                         </div>
                         <!-- End Col -->
@@ -98,12 +102,17 @@
                         <div class="sm:col-span-9">
                             <div class="space-y-2">
 
-                                <select id="transactionType" name="transactionType">
+                                <select id="transactionType" th:field="*{transactionType}"
+                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
                                     <option value="">Выберите тип транзакции</option>
                                     <option th:each="type : ${types}"
                                             th:value="${type.id}"
                                             th:text="${type.transactionTypeName}">Transaction Type Name</option>
                                 </select>
+
+                                <div th:if="${#fields.hasErrors('transactionType')}">
+                                    <span th:errors="*{transactionType}" class="text-red-500"></span>
+                                </div>
 
                             </div>
                         </div>
@@ -119,12 +128,16 @@
                         <div class="sm:col-span-9">
                             <div class="space-y-2">
 
-                                <select id="category" name="category">
+                                <select id="category" th:field="*{category}"
+                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
                                     <option th:each="categoryVal : ${T(org.income_expenses.models.TransactionCategory).values()}"
                                             th:value="${categoryVal}"
                                             th:text="${categoryVal}"></option>
                                 </select>
 
+                                <div th:if="${#fields.hasErrors('category')}">
+                                    <span th:errors="*{category}" class="text-red-500"></span>
+                                </div>
 
                             </div>
                         </div>
@@ -134,7 +147,7 @@
 
                     <div class="mt-5 flex justify-end gap-x-2">
                         <button type="button"
-                                th:onclick="|window.location.href = '@{/finance/income}'|"
+                                th:onclick="|window.location.href = '@{/finance/income(walletId=${selectedWalletId})}'|"
                                 class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
                             Вернуться
                         </button>
