@@ -6,10 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
 import org.income_expenses.models.*;
-import org.income_expenses.repositories.FamilyWalletRepository;
-import org.income_expenses.repositories.TransactionTypeRepository;
-import org.income_expenses.repositories.WalletMemberRepository;
-import org.income_expenses.repositories.WalletTransactionRepository;
+import org.income_expenses.repositories.*;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +28,7 @@ public class IncomeService {
     private final FamilyWalletRepository familyWalletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
     private final TransactionTypeRepository transactionTypeRepository;
+    private final OrganizationRepository organizationRepository;
     private final WalletMemberRepository walletMemberRepository;
 
     public FamilyWallet getFamilyWalletById(Long id) {
@@ -59,6 +58,7 @@ public class IncomeService {
                 .amount(BigDecimal.valueOf(transaction.getAmount()))
                 .whoPerformed(currentUser)
                 .whenPerformed(transaction.getWhenPerformed())
+                .organization(transaction.getOrganization())
                 .transactionType(transaction.getTransactionType())
                 .category(transaction.getCategory())
                 .createdBy(currentUser)
@@ -104,11 +104,19 @@ public class IncomeService {
         return walletTransactionRepository.incomeTransactionsCount(currentUser.getId(), wallet.getId());
     }
 
-    public List<TransactionType> getIncomeTransactionTypeList() {
+    public List<TransactionType> getTransactionTypeList(TransactionCategory transactionCategory) {
         return transactionTypeRepository
                 .findAll()
                 .stream()
-                .filter(type -> type.getCategory() == TransactionCategory.INCOME)
+                .filter(type -> type.getCategory() == transactionCategory)
+                .collect(Collectors.toList());
+    }
+
+    public List<Organization> getOrganizations(TransactionCategory transactionCategory) {
+        return organizationRepository
+                .findAll()
+                .stream()
+                .filter(org -> org.getCategory() == transactionCategory)
                 .collect(Collectors.toList());
     }
 

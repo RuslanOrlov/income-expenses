@@ -35,6 +35,10 @@ public class WalletTransaction {
     private LocalDateTime whenPerformed;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", referencedColumnName = "id")
+    private Organization organization;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_type_id", referencedColumnName = "id")
     private TransactionType transactionType;
 

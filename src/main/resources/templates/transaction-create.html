@@ -93,6 +93,32 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
+                            <label for="organization" class="inline-block text-sm text-foreground mt-2.5">
+                                Источник дохода
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <div class="space-y-2">
+
+                                <select id="organization" th:field="*{organization}"
+                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
+                                    <option value="">Выберите источник дохода</option>
+                                    <option th:each="org : ${organizations}"
+                                            th:value="${org.id}"
+                                            th:text="${org.organizationName}">Transaction Type Name</option>
+                                </select>
+
+                                <div th:if="${#fields.hasErrors('organization')}">
+                                    <span th:errors="*{organization}" class="text-red-500"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
                             <label for="transactionType" class="inline-block text-sm text-foreground mt-2.5">
                                 Тип транзакции
                             </label>

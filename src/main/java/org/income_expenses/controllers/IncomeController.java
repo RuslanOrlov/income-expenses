@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
 import org.income_expenses.models.FamilyWallet;
 import org.income_expenses.models.MyUser;
+import org.income_expenses.models.TransactionCategory;
 import org.income_expenses.models.WalletTransaction;
 import org.income_expenses.repositories.WalletMemberRepository;
 import org.income_expenses.services.FinanceService;
@@ -95,7 +96,8 @@ public class IncomeController {
     @GetMapping("/create")
     public String openCreateForm(Model model, @RequestParam(value = "walletId", required = false) Long walletId) {
         model.addAttribute("transaction", new TransactionDto());
-        model.addAttribute("types", incomeService.getIncomeTransactionTypeList());
+        model.addAttribute("organizations", incomeService.getOrganizations(TransactionCategory.INCOME));
+        model.addAttribute("types", incomeService.getTransactionTypeList(TransactionCategory.INCOME));
         model.addAttribute("selectedWalletId", walletId);
         return "transaction-create";
     }
@@ -110,7 +112,8 @@ public class IncomeController {
             for (ObjectError error : bindingResult.getAllErrors()) {
                 log.info("--- error {}", error.getDefaultMessage());
                 model.addAttribute("transaction", transaction);
-                model.addAttribute("types", incomeService.getIncomeTransactionTypeList());
+                model.addAttribute("organizations", incomeService.getOrganizations(TransactionCategory.INCOME));
+                model.addAttribute("types", incomeService.getTransactionTypeList(TransactionCategory.INCOME));
                 model.addAttribute("selectedWalletId", walletId);
             }
             return  "transaction-create";
