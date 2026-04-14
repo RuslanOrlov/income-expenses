@@ -22,7 +22,7 @@ public class TransactionDto {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime whenPerformed;
 
-    @NotNull(message = "Организация должна быть указана")
+    @NotNull(message = "Значение поля должно быть указано")
     private Organization organization;
 
     @NotNull(message = "Тип транзакции должен быть указан")
@@ -30,4 +30,6 @@ public class TransactionDto {
 
     @NotNull(message = "Категория транзакции должна быть указана")
     private TransactionCategory category;
+
+    String description;
 }

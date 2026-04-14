@@ -61,6 +61,7 @@ public class IncomeService {
                 .organization(transaction.getOrganization())
                 .transactionType(transaction.getTransactionType())
                 .category(transaction.getCategory())
+                .description(transaction.getDescription())
                 .createdBy(currentUser)
                 .createdAt(LocalDateTime.now())
                 .build();

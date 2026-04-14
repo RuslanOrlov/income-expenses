@@ -168,6 +168,20 @@
                             </div>
                         </div>
                         <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="description" class="inline-block text-sm text-foreground mt-2.5">
+                                Описание (опционально)
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <textarea id="description" th:field="*{description}" class="py-1.5 sm:py-2 px-3 block block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none"
+                                      rows="2" placeholder="краткое описание (комментарий)"></textarea>
+                        </div>
+                        <!-- End Col -->
+
                     </div>
                     <!-- End Grid -->
 

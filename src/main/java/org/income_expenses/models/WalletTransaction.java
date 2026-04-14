@@ -45,6 +45,8 @@ public class WalletTransaction {
     @Enumerated(value = EnumType.STRING)
     private TransactionCategory category;
 
+    String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", referencedColumnName = "id")
     private MyUser createdBy;
