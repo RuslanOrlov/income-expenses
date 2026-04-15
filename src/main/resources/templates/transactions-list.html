@@ -260,20 +260,12 @@
                                                 <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-40 z-20 bg-dropdown border border-dropdown-line divide-y divide-dropdown-divider shadow-2xl rounded-lg p-1" role="menu" aria-orientation="vertical" aria-labelledby="hs-table-dropdown-1">
                                                     <div class="py-2 first:pt-0 last:pb-0">
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:href="@{#}">
+                                                           th:href="@{/finance/income/{id}(id=${transaction.getId()}, curPage=${page.number}, walletId=${selectedWalletId})}">
                                                             Открыть транзакцию
                                                         </a>
                                                         <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:href="@{#}">
+                                                           th:href="@{/finance/income/{id}/change(id=${transaction.getId()}, curPage=${page.number}, walletId=${selectedWalletId})}">
                                                             Изменить транзакцию
-                                                        </a>
-                                                        <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:href="@{#}">
-                                                            Операция ...
-                                                        </a>
-                                                        <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus"
-                                                           th:href="@{#}">
-                                                            Операция ...
                                                         </a>
                                                     </div>
                                                     <div class="py-2 first:pt-0 last:pb-0">

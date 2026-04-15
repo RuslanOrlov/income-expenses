@@ -2,6 +2,7 @@ package org.income_expenses.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
@@ -53,7 +54,7 @@ public class IncomeService {
     public void createIncomeTransaction(TransactionDto transaction, MyUser currentUser) {
         FamilyWallet wallet = getWalletMember(currentUser).getWallet();
 
-        WalletTransaction newTransaction= WalletTransaction.builder()
+        WalletTransaction newTransaction = WalletTransaction.builder()
                 .wallet(wallet)
                 .amount(BigDecimal.valueOf(transaction.getAmount()))
                 .whoPerformed(currentUser)
@@ -72,6 +73,17 @@ public class IncomeService {
         wallet.setTotalAmount(wallet.getTotalAmount().add(newTransaction.getAmount()));
 
         familyWalletRepository.save(wallet);
+    }
+
+    public void changeIncomeTransaction(TransactionDto transaction, Long id) {
+        // Получаем транзакцию
+        WalletTransaction updated = this.getIncomeCard(id);
+        // Обновляем транзакцию
+        updated.setOrganization(transaction.getOrganization());
+        updated.setTransactionType(transaction.getTransactionType());
+        updated.setDescription(transaction.getDescription());
+        // Сохраняем транзакцию
+        walletTransactionRepository.save(updated);
     }
 
     @Transactional

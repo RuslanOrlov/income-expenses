@@ -2,6 +2,7 @@ package org.income_expenses.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.income_expenses.dto.TransactionDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -52,4 +53,17 @@ public class WalletTransaction {
     private MyUser createdBy;
 
     private LocalDateTime createdAt;
+
+    public TransactionDto toDto() {
+        return TransactionDto.builder()
+                .id(id)
+                .amount(amount.intValue())
+                .whenPerformed(whenPerformed)
+                .organization(organization)
+                .transactionType(transactionType)
+                .category(category)
+                .description(description)
+                .build();
+    }
+
 }

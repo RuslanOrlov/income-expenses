@@ -87,15 +87,63 @@ public class IncomeController {
     }
 
     @GetMapping("/{id:\\d+}")
-    public String getIncomeTransactionCard(@PathVariable("id") Long id, Model model) {
-        WalletTransaction income = incomeService.getIncomeCard(id);
-        model.addAttribute("income", income);
+    public String getIncomeTransactionCard(@PathVariable("id") Long id, Model model,
+                                           @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+                                           @RequestParam(value = "walletId", required = false) Long walletId) {
+        WalletTransaction transaction = incomeService.getIncomeCard(id);
+
+        model.addAttribute("transaction", transaction);
+        model.addAttribute("selectedWalletId", walletId);
+        model.addAttribute("curPage", curPage);
+
         return "transaction-card";
+    }
+
+    @GetMapping("/{id:\\d+}/change")
+    public String openChangeForm(@PathVariable("id") Long id, Model model,
+                                 @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+                                 @RequestParam(value = "walletId", required = false) Long walletId) {
+        WalletTransaction transaction = incomeService.getIncomeCard(id);
+
+        model.addAttribute("transaction", transaction.toDto());
+        model.addAttribute("organizations", incomeService.getOrganizations(TransactionCategory.INCOME));
+        model.addAttribute("types", incomeService.getTransactionTypeList(TransactionCategory.INCOME));
+        model.addAttribute("selectedWalletId", walletId);
+        model.addAttribute("curPage", curPage);
+        model.addAttribute("id", id);
+
+        return "transaction-change";
+    }
+
+    @PostMapping("/{id:\\d+}/change")
+    public String changeIncome(@PathVariable("id") Long id,
+                               @ModelAttribute("transaction") @Valid TransactionDto transaction,
+                               BindingResult bindingResult,
+                               @AuthenticationPrincipal MyUser currentUser,
+                               @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+                               @RequestParam(value = "walletId", required = false) Long walletId,
+                               Model model) {
+        if (bindingResult.hasErrors()) {
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                log.info("--- error {}", error.getDefaultMessage());
+                model.addAttribute("transaction", transaction);
+                model.addAttribute("organizations", incomeService.getOrganizations(TransactionCategory.INCOME));
+                model.addAttribute("types", incomeService.getTransactionTypeList(TransactionCategory.INCOME));
+                model.addAttribute("selectedWalletId", walletId);
+                model.addAttribute("curPage", curPage);
+                model.addAttribute("id", id);
+            }
+            return  "transaction-change";
+        }
+
+        incomeService.changeIncomeTransaction(transaction, id);
+
+        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
     }
 
     @GetMapping("/create")
     public String openCreateForm(Model model, @RequestParam(value = "walletId", required = false) Long walletId) {
-        model.addAttribute("transaction", new TransactionDto());
+        model.addAttribute("transaction", TransactionDto.builder().category(TransactionCategory.INCOME).build());
         model.addAttribute("organizations", incomeService.getOrganizations(TransactionCategory.INCOME));
         model.addAttribute("types", incomeService.getTransactionTypeList(TransactionCategory.INCOME));
         model.addAttribute("selectedWalletId", walletId);

@@ -113,7 +113,7 @@ public class DataLoader implements CommandLineRunner {
                         .build());
         organizationRepository
                 .save(Organization.builder()
-                        .organizationName("Наличные деньги")
+                        .organizationName("Собственные деньги")
                         .category(TransactionCategory.INCOME)
                         .createdAt(LocalDateTime.now())
                         .build());

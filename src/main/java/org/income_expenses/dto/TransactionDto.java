@@ -3,7 +3,7 @@ package org.income_expenses.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
+import lombok.*;
 import org.income_expenses.models.Organization;
 import org.income_expenses.models.TransactionCategory;
 import org.income_expenses.models.TransactionType;
@@ -11,8 +11,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TransactionDto {
+    private Long id;
+
     @NotNull(message = "Сумма не может быть пустой")
     @Positive(message = "Сумма должна быть указана > 0")
     private Integer amount;
