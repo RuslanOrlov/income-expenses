@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.ChangePasswordForm;
+import org.income_expenses.dto.ChangeSettingsForm;
 import org.income_expenses.models.MyUser;
 import org.income_expenses.services.SessionService;
 import org.income_expenses.services.UserService;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -99,6 +102,32 @@ public class SettingsController {
         return "redirect:/settings";
     }
 
+    @GetMapping("/change-my-settings")
+    public String mySettings(Model model,
+                             @AuthenticationPrincipal MyUser user) {
+        ChangeSettingsForm form = ChangeSettingsForm.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .pageSize(user.getPageSize())
+                .build();
+        model.addAttribute("user", form);
+        return "user-settings-change";
+    }
+
+    @PostMapping("/change-my-settings")
+    public String mySettings(@Valid @ModelAttribute("user") ChangeSettingsForm form,
+                             BindingResult errors,
+                             Model model,
+                             @AuthenticationPrincipal MyUser currentUser) {
+        if (errors.hasErrors()) {
+            model.addAttribute("user", form);
+            return "user-settings-change";
+        }
+        currentUser.setPageSize(form.getPageSize());
+        userService.saveUser(currentUser);
+        return "redirect:/settings";
+    }
+
     // Метод управления размером страницы текущего пользователя
     @PostMapping("/users/change-page-size")
     public String changePageSizeUsers(@ModelAttribute("currentUser") MyUser user,
@@ -118,6 +147,7 @@ public class SettingsController {
                 curPage, currentUser.getPageSize());
         model.addAttribute("users", page.getContent());
         model.addAttribute("page", page);
+        model.addAttribute("predefinedPageSizeValues", List.of(1,2,3,5,7,10,20));
 
         return "users-list";
     }

@@ -101,6 +101,12 @@ public class DataLoader implements CommandLineRunner {
                         .build());
         organizationRepository
                 .save(Organization.builder()
+                        .organizationName("Собственные деньги")
+                        .category(TransactionCategory.INCOME)
+                        .createdAt(LocalDateTime.now())
+                        .build());
+        organizationRepository
+                .save(Organization.builder()
                         .organizationName("Работа самозанятым")
                         .category(TransactionCategory.INCOME)
                         .createdAt(LocalDateTime.now())
@@ -108,12 +114,6 @@ public class DataLoader implements CommandLineRunner {
         organizationRepository
                 .save(Organization.builder()
                         .organizationName("Работа ИП")
-                        .category(TransactionCategory.INCOME)
-                        .createdAt(LocalDateTime.now())
-                        .build());
-        organizationRepository
-                .save(Organization.builder()
-                        .organizationName("Собственные деньги")
                         .category(TransactionCategory.INCOME)
                         .createdAt(LocalDateTime.now())
                         .build());
