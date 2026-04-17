@@ -81,6 +81,7 @@ public class IncomeController {
             model.addAttribute("page", Page.empty());
         }
 
+        model.addAttribute("predefinedPageSizeValues", List.of(1,2,3,5,7,10,20));
         model.addAttribute("selectedWalletId", walletId);
 
         return "transactions-list";
