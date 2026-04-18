@@ -33,6 +33,27 @@ public interface WalletTransactionRepository extends JpaRepository<WalletTransac
     );
 
     @Query( nativeQuery = true,
+            value =         "SELECT wt.* " +
+                    "FROM public.wallet_transaction wt " +
+                    "JOIN public.family_wallet fw ON fw.id = wt.wallet_id " +
+                    "JOIN public.wallet_member wm ON wm.wallet_id = fw.id " +
+                    "WHERE wt.wallet_id = :walletId " +
+                    "AND (fw.owner_id = :userId OR wm.member_id = :userId) " +
+                    "AND wt.category = 'EXPENSE'",
+            countQuery =    "SELECT COUNT(wt.*) " +
+                    "FROM public.wallet_transaction wt " +
+                    "JOIN public.family_wallet fw ON fw.id = wt.wallet_id " +
+                    "JOIN public.wallet_member wm ON wm.wallet_id = fw.id " +
+                    "WHERE wt.wallet_id = :walletId " +
+                    "AND (fw.owner_id = :userId OR wm.member_id = :userId) " +
+                    "AND wt.category = 'EXPENSE'" )
+    Page<WalletTransaction> getExpenseTransactions(
+            @Param("userId") Long userId,
+            @Param("walletId") Long walletId,
+            Pageable pageable
+    );
+
+    @Query( nativeQuery = true,
             value = "SELECT COUNT(wt.*) " +
                         "FROM public.wallet_transaction wt " +
                         "JOIN public.family_wallet fw ON fw.id = wt.wallet_id " +
@@ -41,4 +62,14 @@ public interface WalletTransactionRepository extends JpaRepository<WalletTransac
                         "AND (fw.owner_id = :userId OR wm.member_id = :userId) " +
                         "AND wt.category = 'INCOME'" )
     long incomeTransactionsCount(@Param("userId") Long userId, @Param("walletId") Long walletId);
+
+    @Query( nativeQuery = true,
+            value = "SELECT COUNT(wt.*) " +
+                    "FROM public.wallet_transaction wt " +
+                    "JOIN public.family_wallet fw ON fw.id = wt.wallet_id " +
+                    "JOIN public.wallet_member wm ON wm.wallet_id = fw.id " +
+                    "WHERE wt.wallet_id = :walletId " +
+                    "AND (fw.owner_id = :userId OR wm.member_id = :userId) " +
+                    "AND wt.category = 'EXPENSE'" )
+    long expenseTransactionsCount(@Param("userId") Long userId, @Param("walletId") Long walletId);
 }

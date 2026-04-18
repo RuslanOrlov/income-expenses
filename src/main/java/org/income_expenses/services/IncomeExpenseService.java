@@ -2,13 +2,11 @@ package org.income_expenses.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
 import org.income_expenses.models.*;
 import org.income_expenses.repositories.*;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class IncomeService {
+public class IncomeExpenseService {
 
     private final FamilyWalletRepository familyWalletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
@@ -44,9 +42,17 @@ public class IncomeService {
         return page;
     }
 
-    public WalletTransaction getIncomeCard(Long id) {
+    public Page<WalletTransaction> getExpenseTransactions(MyUser currentUser, FamilyWallet wallet,
+                                                          int curPage, int pageSize) {
+        Pageable pageable = PageRequest.of(curPage, pageSize, Sort.by("id").descending());
+        Page<WalletTransaction> page =
+                walletTransactionRepository.getExpenseTransactions(currentUser.getId(), wallet.getId(), pageable);
+        return page;
+    }
+
+    public WalletTransaction getIncomeOrExpenseCard(Long id) {
         WalletTransaction transaction = walletTransactionRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("No income transaction found"));
+                .orElseThrow(() -> new NoSuchElementException("No transaction found"));
         return transaction;
     }
 
@@ -75,9 +81,34 @@ public class IncomeService {
         familyWalletRepository.save(wallet);
     }
 
-    public void changeIncomeTransaction(TransactionDto transaction, Long id) {
+    @Transactional
+    public void createExpenseTransaction(TransactionDto transaction, MyUser currentUser) {
+        FamilyWallet wallet = getWalletMember(currentUser).getWallet();
+
+        WalletTransaction newTransaction = WalletTransaction.builder()
+                .wallet(wallet)
+                .amount(BigDecimal.valueOf(transaction.getAmount() * -1))
+                .whoPerformed(currentUser)
+                .whenPerformed(transaction.getWhenPerformed())
+                .organization(transaction.getOrganization())
+                .transactionType(transaction.getTransactionType())
+                .category(transaction.getCategory())
+                .description(transaction.getDescription())
+                .createdBy(currentUser)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        List<WalletTransaction> transactions = wallet.getTransactions();
+        transactions.add(newTransaction);
+        wallet.setTransactions(transactions);
+        wallet.setTotalAmount(wallet.getTotalAmount().add(newTransaction.getAmount()));
+
+        familyWalletRepository.save(wallet);
+    }
+
+    public void changeIncomeOrExpenseTransaction(TransactionDto transaction, Long id) {
         // Получаем транзакцию
-        WalletTransaction updated = this.getIncomeCard(id);
+        WalletTransaction updated = this.getIncomeOrExpenseCard(id);
         // Обновляем транзакцию
         updated.setOrganization(transaction.getOrganization());
         updated.setTransactionType(transaction.getTransactionType());
@@ -87,7 +118,7 @@ public class IncomeService {
     }
 
     @Transactional
-    public void deleteIncome(Long id) {
+    public void deleteIncomeOrExpense(Long id) {
         WalletTransaction transaction = walletTransactionRepository
                 .findById(id).orElseThrow(() -> new NoSuchElementException("No income transaction found"));
 
@@ -96,7 +127,7 @@ public class IncomeService {
         if (transaction.getCategory().equals(TransactionCategory.INCOME)) {
             wallet.setTotalAmount(wallet.getTotalAmount().subtract(transaction.getAmount()));
         } else {
-            wallet.setTotalAmount(wallet.getTotalAmount().add(transaction.getAmount()));
+            wallet.setTotalAmount(wallet.getTotalAmount().add(transaction.getAmount().abs()));
         }
 
         List<WalletTransaction> transactions = wallet.getTransactions();
@@ -115,6 +146,10 @@ public class IncomeService {
 
     public long incomeTransactionsCount(MyUser currentUser, FamilyWallet wallet) {
         return walletTransactionRepository.incomeTransactionsCount(currentUser.getId(), wallet.getId());
+    }
+
+    public long expenseTransactionsCount(MyUser currentUser, FamilyWallet wallet) {
+        return walletTransactionRepository.expenseTransactionsCount(currentUser.getId(), wallet.getId());
     }
 
     public List<TransactionType> getTransactionTypeList(TransactionCategory transactionCategory) {

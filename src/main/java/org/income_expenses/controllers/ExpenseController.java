@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@RequestMapping(value = "/finance/income")
-public class IncomeController {
+@RequestMapping(value = "/finance/expense")
+public class ExpenseController {
 
     private final IncomeExpenseService incomeExpenseService;
     private final FinanceService financeService;
@@ -56,12 +56,12 @@ public class IncomeController {
                                       @RequestParam(value = "walletId", required = false) Long walletId) {
         currentUser.setPageSize(user.getPageSize());
         userService.saveUser(currentUser);
-        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId : "");
+        return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId : "");
     }
 
     // Методы управления списком приходных транзакций
     @GetMapping
-    public String getIncomeTransactions(Model model,
+    public String getExpenseTransactions(Model model,
                                         @AuthenticationPrincipal MyUser currentUser,
                                         @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                         @RequestParam(value = "walletId", required = false) Long walletId) {
@@ -71,7 +71,7 @@ public class IncomeController {
         if (walletSelected) {
             FamilyWallet wallet = financeService.getFamilyWalletById(walletId);
 
-            Page<WalletTransaction> page = incomeExpenseService.getIncomeTransactions(
+            Page<WalletTransaction> page = incomeExpenseService.getExpenseTransactions(
                     currentUser, wallet, curPage, currentUser.getPageSize());
 
             model.addAttribute("transactions", page.getContent());
@@ -81,8 +81,8 @@ public class IncomeController {
             model.addAttribute("page", Page.empty());
         }
 
-        model.addAttribute("mainPath", "/finance/income");
-        model.addAttribute("title", "Список приходных транзакций");
+        model.addAttribute("mainPath", "/finance/expense");
+        model.addAttribute("title", "Список расходных транзакций");
         model.addAttribute("predefinedPageSizeValues", List.of(1,2,3,5,7,10,20));
         model.addAttribute("selectedWalletId", walletId);
 
@@ -95,8 +95,8 @@ public class IncomeController {
                                            @RequestParam(value = "walletId", required = false) Long walletId) {
         WalletTransaction transaction = incomeExpenseService.getIncomeOrExpenseCard(id);
 
-        model.addAttribute("mainPath", "/finance/income");
-        model.addAttribute("title", "Просмотр приходной транзакции");
+        model.addAttribute("mainPath", "/finance/expense");
+        model.addAttribute("title", "Просмотр расходной транзакции");
         model.addAttribute("transaction", transaction);
         model.addAttribute("selectedWalletId", walletId);
         model.addAttribute("curPage", curPage);
@@ -110,11 +110,11 @@ public class IncomeController {
                                  @RequestParam(value = "walletId", required = false) Long walletId) {
         WalletTransaction transaction = incomeExpenseService.getIncomeOrExpenseCard(id);
 
-        model.addAttribute("mainPath", "/finance/income");
-        model.addAttribute("title", "Редактирование приходной транзакции");
+        model.addAttribute("mainPath", "/finance/expense");
+        model.addAttribute("title", "Редактирование расходной транзакции");
         model.addAttribute("transaction", transaction.toDto());
-        model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.INCOME));
-        model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.INCOME));
+        model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.EXPENSE));
+        model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
         model.addAttribute("selectedWalletId", walletId);
         model.addAttribute("curPage", curPage);
         model.addAttribute("id", id);
@@ -123,7 +123,7 @@ public class IncomeController {
     }
 
     @PostMapping("/{id:\\d+}/change")
-    public String changeIncome(@PathVariable("id") Long id,
+    public String changeExpense(@PathVariable("id") Long id,
                                @ModelAttribute("transaction") @Valid TransactionDto transaction,
                                BindingResult bindingResult,
                                @AuthenticationPrincipal MyUser currentUser,
@@ -134,11 +134,11 @@ public class IncomeController {
             for (ObjectError error : bindingResult.getAllErrors()) {
                 log.info("--- error {}", error.getDefaultMessage());
             }
-            model.addAttribute("mainPath", "/finance/income");
-            model.addAttribute("title", "Редактирование приходной транзакции");
+            model.addAttribute("mainPath", "/finance/expense");
+            model.addAttribute("title", "Редактирование расходной транзакции");
             model.addAttribute("transaction", transaction);
-            model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.INCOME));
-            model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.INCOME));
+            model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.EXPENSE));
+            model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
             model.addAttribute("selectedWalletId", walletId);
             model.addAttribute("curPage", curPage);
             model.addAttribute("id", id);
@@ -147,25 +147,25 @@ public class IncomeController {
 
         incomeExpenseService.changeIncomeOrExpenseTransaction(transaction, id);
 
-        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
+        return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
     }
 
     @GetMapping("/create")
     public String openCreateForm(Model model,
                                  @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                  @RequestParam(value = "walletId", required = false) Long walletId) {
-        model.addAttribute("mainPath", "/finance/income");
-        model.addAttribute("title", "Создание приходной транзакции");
-        model.addAttribute("transaction", TransactionDto.builder().category(TransactionCategory.INCOME).build());
-        model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.INCOME));
-        model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.INCOME));
+        model.addAttribute("mainPath", "/finance/expense");
+        model.addAttribute("title", "Создание расходной транзакции");
+        model.addAttribute("transaction", TransactionDto.builder().category(TransactionCategory.EXPENSE).build());
+        model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.EXPENSE));
+        model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
         model.addAttribute("curPage", curPage);
         model.addAttribute("selectedWalletId", walletId);
         return "transaction-create";
     }
 
     @PostMapping("/create")
-    public String createIncome(@ModelAttribute("transaction") @Valid TransactionDto transaction,
+    public String createExpense(@ModelAttribute("transaction") @Valid TransactionDto transaction,
                                BindingResult bindingResult,
                                @AuthenticationPrincipal MyUser currentUser,
                                @RequestParam(value = "curPage", defaultValue = "0") int curPage,
@@ -175,19 +175,19 @@ public class IncomeController {
             for (ObjectError error : bindingResult.getAllErrors()) {
                 log.info("--- error {}", error.getDefaultMessage());
             }
-            model.addAttribute("mainPath", "/finance/income");
-            model.addAttribute("title", "Создание приходной транзакции");
+            model.addAttribute("mainPath", "/finance/expense");
+            model.addAttribute("title", "Создание расходной транзакции");
             model.addAttribute("transaction", transaction);
-            model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.INCOME));
-            model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.INCOME));
+            model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.EXPENSE));
+            model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
             model.addAttribute("curPage", curPage);
             model.addAttribute("selectedWalletId", walletId);
             return "transaction-create";
         }
 
-        incomeExpenseService.createIncomeTransaction(transaction, currentUser);
+        incomeExpenseService.createExpenseTransaction(transaction, currentUser);
 
-        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId : "");
+        return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId : "");
     }
 
     @GetMapping("/{id:\\d+}/confirm-transaction-deleting")
@@ -198,8 +198,8 @@ public class IncomeController {
 
         model.addAttribute("user", transaction.getWhoPerformed().getUsername());
         model.addAttribute("action", "deleting");
-        model.addAttribute("actionUri", "/finance/income/" + id + "/delete");
-        model.addAttribute("returnTo", "/finance/income");
+        model.addAttribute("actionUri", "/finance/expense/" + id + "/delete");
+        model.addAttribute("returnTo", "/finance/expense");
         model.addAttribute("curPage", curPage);
         model.addAttribute("selectedWalletId", walletId);
 
@@ -211,6 +211,6 @@ public class IncomeController {
                                @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                @RequestParam(value = "walletId", required = false) Long walletId) {
         incomeExpenseService.deleteIncomeOrExpense(id);
-        return "redirect:/finance/income" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
+        return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
     }
 }

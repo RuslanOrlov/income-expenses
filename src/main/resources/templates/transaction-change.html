@@ -52,11 +52,11 @@
             <div class="bg-layer rounded-xl shadow-xs p-4 sm:p-7">
                 <div class="mb-8">
                     <h2 class="text-xl font-bold text-foreground">
-                        Изменение приходной транзакции
+                        <span th:text="${title}"></span>
                     </h2>
                 </div>
 
-                <form th:method="post" th:action="@{/finance/income/{id}/change(id=${transaction.id}, curPage=${curPage}, walletId=${selectedWalletId})}" th:object="${transaction}">
+                <form th:method="post" th:action="@{{path}/{id}/change(path=${mainPath}, id=${transaction.id}, curPage=${curPage}, walletId=${selectedWalletId})}" th:object="${transaction}">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
@@ -189,7 +189,7 @@
 
                     <div class="mt-5 flex justify-end gap-x-2">
                         <button type="button"
-                                th:onclick="|window.location.href = '@{/finance/income(curPage=${curPage}, walletId=${selectedWalletId})}'|"
+                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
                                 class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
                             Вернуться
                         </button>
