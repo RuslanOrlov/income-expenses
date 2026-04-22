@@ -156,7 +156,10 @@ public class IncomeController {
                                  @RequestParam(value = "walletId", required = false) Long walletId) {
         model.addAttribute("mainPath", "/finance/income");
         model.addAttribute("title", "Создание приходной транзакции");
-        model.addAttribute("transaction", TransactionDto.builder().category(TransactionCategory.INCOME).build());
+        model.addAttribute("transaction", TransactionDto.builder()
+                        .category(TransactionCategory.INCOME)
+                        .items(List.of())
+                        .build());
         model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.INCOME));
         model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.INCOME));
         model.addAttribute("curPage", curPage);

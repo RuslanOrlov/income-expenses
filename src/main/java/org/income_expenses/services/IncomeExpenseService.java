@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
+import org.income_expenses.dto.TransactionItemDto;
 import org.income_expenses.models.*;
 import org.income_expenses.repositories.*;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -62,7 +64,7 @@ public class IncomeExpenseService {
 
         WalletTransaction newTransaction = WalletTransaction.builder()
                 .wallet(wallet)
-                .amount(BigDecimal.valueOf(transaction.getAmount()))
+                .amount(transaction.getAmount())
                 .whoPerformed(currentUser)
                 .whenPerformed(transaction.getWhenPerformed())
                 .organization(transaction.getOrganization())
@@ -87,7 +89,7 @@ public class IncomeExpenseService {
 
         WalletTransaction newTransaction = WalletTransaction.builder()
                 .wallet(wallet)
-                .amount(BigDecimal.valueOf(transaction.getAmount() * -1))
+                .amount(transaction.getAmount().negate())
                 .whoPerformed(currentUser)
                 .whenPerformed(transaction.getWhenPerformed())
                 .organization(transaction.getOrganization())
@@ -97,6 +99,19 @@ public class IncomeExpenseService {
                 .createdBy(currentUser)
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        // Process items of transaction
+        List<TransactionItem> transactionItems = new ArrayList<>();
+        for (TransactionItemDto itemDto : transaction.getItems()) {
+            TransactionItem item = TransactionItem.builder()
+                    .amount(itemDto.getAmount())
+                    .description(itemDto.getDescription())
+                    .transaction(newTransaction)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            transactionItems.add(item);
+        }
+        newTransaction.setItems(transactionItems);
 
         List<WalletTransaction> transactions = wallet.getTransactions();
         transactions.add(newTransaction);

@@ -7,6 +7,7 @@ import org.income_expenses.dto.TransactionDto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -57,12 +58,15 @@ public class WalletTransaction {
     public TransactionDto toDto() {
         return TransactionDto.builder()
                 .id(id)
-                .amount(amount.intValue())
+                .amount(amount)
                 .whenPerformed(whenPerformed)
                 .organization(organization)
                 .transactionType(transactionType)
                 .category(category)
                 .description(description)
+                .items(items.stream()
+                        .map(TransactionItem::toDto)
+                        .collect(Collectors.toList()))
                 .build();
     }
 

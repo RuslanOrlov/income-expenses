@@ -156,7 +156,10 @@ public class ExpenseController {
                                  @RequestParam(value = "walletId", required = false) Long walletId) {
         model.addAttribute("mainPath", "/finance/expense");
         model.addAttribute("title", "Создание расходной транзакции");
-        model.addAttribute("transaction", TransactionDto.builder().category(TransactionCategory.EXPENSE).build());
+        model.addAttribute("transaction", TransactionDto.builder()
+                        .category(TransactionCategory.EXPENSE)
+                        .items(List.of())
+                        .build());
         model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.EXPENSE));
         model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
         model.addAttribute("curPage", curPage);
