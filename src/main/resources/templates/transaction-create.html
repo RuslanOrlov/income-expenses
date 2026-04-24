@@ -61,14 +61,16 @@
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
                         <div class="sm:col-span-3">
-                            <label for="amount" class="inline-block text-sm text-foreground mt-2.5">
+                            <label for="total-transaction-amount" class="inline-block text-sm text-foreground mt-2.5">
                                 Сумма транзакции <span class="text-red-500">*</span>
                             </label>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <input id="amount" type="text" th:field="*{amount}" step="0.01" placeholder="0.00"
+                            <input id="total-transaction-amount"
+                                   type="number" th:field="*{amount}"
+                                   step="0.01" placeholder="0.00"
                                    class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
                             <div th:if="${#fields.hasErrors('amount')}">
                                 <span th:errors="*{amount}" class="text-red-500"></span>
@@ -94,7 +96,8 @@
 
                         <div class="sm:col-span-3">
                             <label for="organization" class="inline-block text-sm text-foreground mt-2.5">
-                                Источник дохода <span class="text-red-500">*</span>
+                                <span th:text="${mode == 'INCOME' ? 'Источник дохода' : 'Где потрачено'}"></span>
+                                <span class="text-red-500">*</span>
                             </label>
                         </div>
                         <!-- End Col -->
@@ -104,7 +107,9 @@
 
                                 <select id="organization" th:field="*{organization}"
                                         class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
-                                    <option value="">--- Выберите источник дохода ---</option>
+                                    <option value="">
+                                        <span th:text="${mode == 'INCOME' ? '--- Выберите источник дохода ---' : '--- Выберите где потрачено ---'}"></span>
+                                    </option>
                                     <option th:each="org : ${organizations}"
                                             th:value="${org.id}"
                                             th:text="${org.organizationName}">Transaction Type Name</option>
@@ -187,7 +192,89 @@
                     </div>
                     <!-- End Grid -->
 
+                    <!-- Секция позиций (Отображается ТОЛЬКО для расходов) -->
+                    <div th:if="${mode == 'EXPENSE'}" id="items-section" class="hidden mt-6 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-foreground mb-4">Детализация чека</h3>
+
+                        <!-- Контейнер для динамических строк -->
+                        <div id="items-container" class="space-y-3"></div>
+
+                        <button type="button" onclick="addItem()"
+                                class="mt-3 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-dashed border-gray-300 text-gray-600 hover:bg-gray-50 focus:outline-none">
+                            + Добавить товар/услугу
+                        </button>
+                    </div>
+
+                    <!-- Блок кнопок управления -->
                     <div class="mt-5 flex justify-end gap-x-2">
+                        <!-- Кнопка "Показать список" отображается ТОЛЬКО для расходов -->
+                        <button th:if="${mode == 'EXPENSE'}"
+                                id="toggle-items-btn"
+                                type="button"
+                                onclick="toggleItems()"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-sm hover:bg-gray-100">
+                            Показать список позиций
+                        </button>
+
+                        <button type="button"
+                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-sm hover:bg-gray-100">
+                            Вернуться
+                        </button>
+
+                        <button type="submit"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover">
+                            Создать транзакцию
+                        </button>
+                    </div>
+
+                    <!-- Шаблон строки оборачиваем в th:if, чтобы не загромождать DOM при вводе доходов (не рендерится браузером) -->
+                    <template th:if="${mode == 'EXPENSE'}" id="item-template">
+                        <!-- Используем grid-cols-12. Итоговая сумма колонок (span) должна быть равна 12 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 item-row bg-gray-50 p-2 rounded-lg border border-gray-100 mb-2 items-end">
+
+                            <!-- Наименование: даем больше всего места (5 колонок из 12) -->
+                            <div class="sm:col-span-5">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Наименование</label>
+                                <input type="text" class="item-name py-2 px-3 block w-full border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Товар..." required>
+                            </div>
+
+                            <!-- Цена: 2 колонки -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Цена</label>
+                                <input type="number" step="0.01" class="item-price py-2 px-3 block w-full border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00" required>
+                            </div>
+
+                            <!-- Кол-во: 2 колонки -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Кол-во</label>
+                                <input type="number" step="0.01" class="item-qty py-2 px-3 block w-full border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="1" required>
+                            </div>
+
+                            <!-- Сумма: 2 колонки -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Сумма</label>
+                                <input type="number" step="0.01" class="item-amount py-2 px-3 block w-full border-gray-200 rounded-lg text-sm bg-gray-100 font-semibold" readonly>
+                            </div>
+
+                            <!-- Кнопка удаления: 1 колонка -->
+                            <div class="sm:col-span-1 flex justify-center pb-2">
+                                <button type="button" onclick="removeItem(this)" class="text-red-400 hover:text-red-600 transition p-2">
+                                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!--<div class="mt-5 flex justify-end gap-x-2">
+                        <button th:if="${mode == 'EXPENSE'}"
+                                type="button"
+                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
+                            Показать список позиций
+                        </button>
                         <button type="button"
                                 th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
                                 class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
@@ -197,7 +284,8 @@
                                 class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none">
                             Создать транзакцию
                         </button>
-                    </div>
+                    </div>-->
+
                 </form>
             </div>
             <!-- End Card -->
@@ -255,5 +343,152 @@
 <!-- ========== END FOOTER ========== -->
 
 <script th:src="@{/js/preline.js}"></script>                 <!-- Preline UI -->
+
+<script>
+    /**
+     * ПЕРЕМЕННЫЕ И ПРИНЦИПЫ:
+     * itemIndex — глобальный счетчик строк для отслеживания количества позиций.
+     * Он критически важен для Spring Boot.
+     * Поля должны иметь имена вида items[0].name, items[1].name и т.д.
+     * Если в нумерации будет пропуск (например, 0, 2, 3), Spring выдаст ошибку.
+     */
+    let itemIndex = 0;
+
+    /**
+     * Переключает видимость секции со списком товаров.
+     * При первом открытии автоматически добавляет пустую строку.
+     */
+    function toggleItems() {
+        const section = document.getElementById('items-section');
+        const btn = document.getElementById('toggle-items-btn');
+
+        // Проверяем, скрыт ли элемент сейчас (Tailwind класс 'hidden')
+        if (section.classList.contains('hidden')) {
+            section.classList.remove('hidden'); // Показываем секцию
+            btn.textContent = 'Скрыть список позиций'; // Меняем надпись на кнопке
+
+            // Если пользователь открыл список впервые и там еще нет строк,
+            // то автоматически добавляем первую пустую строку для удобства
+            if (itemIndex === 0) {
+                addItem();
+            }
+        } else {
+            section.classList.add('hidden'); // Прячем секцию
+            btn.textContent = 'Показать список позиций'; // Возвращаем исходный текст
+        }
+    }
+
+    /**
+     * Рассчитывает общую сумму всей транзакции.
+     * Пробегает по всем строкам, суммирует их итоги и пишет результат в главное поле.
+     */
+    function updateGlobalTotal() {
+        // Выбираем все поля "Сумма" во всех строках позиций
+        const allItemAmounts = document.querySelectorAll('.item-amount');
+        let total = 0;
+
+        allItemAmounts.forEach(input => {
+            // Преобразуем текст из поля в число. Если там пусто — берем 0.
+            const value = parseFloat(input.value) || 0;
+            total += value;
+        });
+
+        // Находим основное поле суммы транзакции (id="total-transaction-amount")
+        const globalTotalInput = document.getElementById('total-transaction-amount');
+        if (globalTotalInput) {
+            // Записываем итоговую сумму, округленную до 2 знаков для BigDecimal
+            globalTotalInput.value = total.toFixed(2);
+        }
+    }
+
+    /**
+     * Добавляет новую строку товара в список.
+     * Копирует структуру из <template> и настраивает связи.
+     */
+    function addItem() {
+        const container = document.getElementById('items-container');
+        // Клонируем (берем) "пустой шаблон" из тега <template> (глубокое копирование)
+        const template = document.getElementById('item-template').content.cloneNode(true);
+
+        // Находим элементы внутри этого шаблона
+        const row = template.querySelector('.item-row');
+        const nameInput = row.querySelector('.item-name');
+        const priceInput = row.querySelector('.item-price');
+        const qtyInput = row.querySelector('.item-qty');
+        const amountInput = row.querySelector('.item-amount');
+
+        // Настраиваем атрибуты 'name' для автоматического маппинга в Java List<TransactionItemDto>,
+        // чтобы Spring Boot понял, в какое поле DTO положить данные.
+        // Крайне важно: индекс в квадратных скобках [index]
+        // Формат: items[индекс].имяПоляВDto
+        nameInput.setAttribute('name', `items[${itemIndex}].name`);
+        priceInput.setAttribute('name', `items[${itemIndex}].price`);
+        qtyInput.setAttribute('name', `items[${itemIndex}].quantity`);
+        amountInput.setAttribute('name', `items[${itemIndex}].amount`);
+
+        /**
+         * Добавляем обработчик события: при изменении цены или количества пересчитывать сумму позиции
+         * Логика расчета внутри строки: Сумма = Цена * Количество
+         */
+        const calculateRowAmount = () => {
+            const p = parseFloat(priceInput.value) || 0;
+            const q = parseFloat(qtyInput.value) || 0;
+            // Считаем итог строки
+            amountInput.value = (p * q).toFixed(2); // Округляем до 2 знаков (BigDecimal compatible)
+
+            // Сразу после этого пересчитываем общую сумму всей транзакции
+            updateGlobalTotal();
+        };
+
+        // Слушаем любые изменения (ввод цифр, удаление, вставка) в полях Цены и Количества
+        priceInput.addEventListener('input', calculateRowAmount);
+        qtyInput.addEventListener('input', calculateRowAmount);
+
+        // Добавляем готовую настроенную строку в конец контейнера
+        container.appendChild(template);
+
+        // Увеличиваем индекс, чтобы следующая строка получила следующий порядковый номер
+        itemIndex++;
+    }
+
+    /**
+     * Удаляет выбранную строку.
+     * @param {HTMLElement} button — элемент кнопки удаления (this)
+     */
+    function removeItem(button) {
+        // Ищем ближайшего родителя с классом .item-row и удаляем его из DOM
+        button.closest('.item-row').remove();
+
+        // ПЕРЕИНДЕКСАЦИЯ: обязательный шаг!
+        // Если мы удалили строку №1 из трех (0, 1, 2), то оставшиеся станут 0 и 2.
+        // Spring Boot не поймет индекс 2, если нет индекса 1. Нужно сделать их 0 и 1,
+        // иначе Spring Boot не сможет корректно собрать List из-за "дырок" в нумерации.
+        reIndexItems();
+
+        // Обновляем общую сумму транзакции после удаления позиции
+        updateGlobalTotal();
+    }
+
+    /**
+     * Проходит по всем существующим строкам и заново проставляет им индексы 0, 1, 2...
+     * Это гарантирует, что список данных уйдет на сервер без "дырок" в массиве.
+     */
+    function reIndexItems() {
+        const rows = document.querySelectorAll('.item-row');
+        itemIndex = 0; // Сбрасываем глобальный счетчик
+
+        rows.forEach(row => {
+            // Обновляем атрибуты name для каждого поля в строке
+            row.querySelector('.item-name').setAttribute('name', `items[${itemIndex}].name`);
+            row.querySelector('.item-price').setAttribute('name', `items[${itemIndex}].price`);
+            row.querySelector('.item-qty').setAttribute('name', `items[${itemIndex}].quantity`);
+            row.querySelector('.item-amount').setAttribute('name', `items[${itemIndex}].amount`);
+
+            // Увеличиваем счетчик для следующей итерации цикла
+            itemIndex++;
+        });
+    }
+</script>
+
 </body>
 </html>

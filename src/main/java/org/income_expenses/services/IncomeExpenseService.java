@@ -104,8 +104,10 @@ public class IncomeExpenseService {
         List<TransactionItem> transactionItems = new ArrayList<>();
         for (TransactionItemDto itemDto : transaction.getItems()) {
             TransactionItem item = TransactionItem.builder()
+                    .name(itemDto.getName())
+                    .price(itemDto.getPrice())
+                    .quantity(itemDto.getQuantity())
                     .amount(itemDto.getAmount())
-                    .description(itemDto.getDescription())
                     .transaction(newTransaction)
                     .createdAt(LocalDateTime.now())
                     .build();

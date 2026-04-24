@@ -18,10 +18,16 @@ public class TransactionItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
+    @Column(precision = 19, scale = 2)
+    private  BigDecimal price;
+
+    @Column(precision = 19, scale = 2)
+    private  BigDecimal quantity;
+
     @Column(precision = 19, scale = 2)
     private BigDecimal amount;
-
-    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_id",referencedColumnName = "id")
@@ -32,8 +38,10 @@ public class TransactionItem {
     public TransactionItemDto toDto() {
         TransactionItemDto transactionItemDto = TransactionItemDto.builder()
                 .id(id)
+                .name(name)
+                .price(price)
+                .quantity(quantity)
                 .amount(amount)
-                .description(description)
                 .build();
         return transactionItemDto;
     }

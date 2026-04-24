@@ -164,6 +164,7 @@ public class IncomeController {
         model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.INCOME));
         model.addAttribute("curPage", curPage);
         model.addAttribute("selectedWalletId", walletId);
+        model.addAttribute("mode", "INCOME");
         return "transaction-create";
     }
 
@@ -185,6 +186,7 @@ public class IncomeController {
             model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.INCOME));
             model.addAttribute("curPage", curPage);
             model.addAttribute("selectedWalletId", walletId);
+            model.addAttribute("mode", "INCOME");
             return "transaction-create";
         }
 

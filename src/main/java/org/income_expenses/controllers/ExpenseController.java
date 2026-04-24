@@ -164,6 +164,8 @@ public class ExpenseController {
         model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
         model.addAttribute("curPage", curPage);
         model.addAttribute("selectedWalletId", walletId);
+        model.addAttribute("mode", "EXPENSE");
+        model.addAttribute("showItems", false);
         return "transaction-create";
     }
 
@@ -185,6 +187,8 @@ public class ExpenseController {
             model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
             model.addAttribute("curPage", curPage);
             model.addAttribute("selectedWalletId", walletId);
+            model.addAttribute("mode", "EXPENSE");
+            model.addAttribute("showItems", false);
             return "transaction-create";
         }
 
