@@ -192,20 +192,7 @@
                     </div>
                     <!-- End Grid -->
 
-                    <!-- Секция позиций (Отображается ТОЛЬКО для расходов) -->
-                    <div th:if="${mode == 'EXPENSE'}" id="items-section" class="hidden mt-6 border-t border-gray-200 pt-6">
-                        <h3 class="text-lg font-semibold text-foreground mb-4">Детализация чека</h3>
-
-                        <!-- Контейнер для динамических строк -->
-                        <div id="items-container" class="space-y-3"></div>
-
-                        <button type="button" onclick="addItem()"
-                                class="mt-3 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-dashed border-gray-300 text-gray-600 hover:bg-gray-50 focus:outline-none">
-                            + Добавить товар/услугу
-                        </button>
-                    </div>
-
-                    <!-- Блок кнопок управления -->
+                    <!-- Блок основных кнопок управления -->
                     <div class="mt-5 flex justify-end gap-x-2">
                         <!-- Кнопка "Показать список" отображается ТОЛЬКО для расходов -->
                         <button th:if="${mode == 'EXPENSE'}"
@@ -228,7 +215,20 @@
                         </button>
                     </div>
 
-                    <!-- Шаблон строки оборачиваем в th:if, чтобы не загромождать DOM при вводе доходов (не рендерится браузером) -->
+                    <!-- Секция списка позиций: - раскрывается НИЖЕ кнопок; - отображается ТОЛЬКО для расходов -->
+                    <div th:if="${mode == 'EXPENSE'}" id="items-section" class="hidden mt-6 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-foreground mb-4">Детализация чека</h3>
+
+                        <!-- Контейнер для динамических строк -->
+                        <div id="items-container" class="space-y-3"></div>
+
+                        <button type="button" onclick="addItem()"
+                                class="mt-3 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-dashed border-gray-300 text-gray-600 hover:bg-gray-50 focus:outline-none">
+                            + Добавить товар/услугу
+                        </button>
+                    </div>
+
+                    <!-- Шаблон строки обернут в th:if, чтобы не загромождать DOM при вводе доходов (не рендерится браузером) -->
                     <template th:if="${mode == 'EXPENSE'}" id="item-template">
                         <!-- Используем grid-cols-12. Итоговая сумма колонок (span) должна быть равна 12 -->
                         <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 item-row bg-gray-50 p-2 rounded-lg border border-gray-100 mb-2 items-end">
@@ -364,14 +364,19 @@
 
         // Проверяем, скрыт ли элемент сейчас (Tailwind класс 'hidden')
         if (section.classList.contains('hidden')) {
-            section.classList.remove('hidden'); // Показываем секцию
-            btn.textContent = 'Скрыть список позиций'; // Меняем надпись на кнопке
+            // Показываем секцию
+            section.classList.remove('hidden');
+            // Меняем надпись на кнопке
+            btn.textContent = 'Скрыть список позиций';
 
             // Если пользователь открыл список впервые и там еще нет строк,
-            // то автоматически добавляем первую пустую строку для удобства
+            // автоматически добавляем первую пустую строку для удобства
             if (itemIndex === 0) {
                 addItem();
             }
+
+            // Плавно прокручиваем (скроллим) страницу к началу списка
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
             section.classList.add('hidden'); // Прячем секцию
             btn.textContent = 'Показать список позиций'; // Возвращаем исходный текст
