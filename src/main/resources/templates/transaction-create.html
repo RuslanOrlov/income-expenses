@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
-    <title>Creating Income Transaction</title>
+    <title th:text="${mode == 'INCOME' ? 'Creating Income Transaction' : 'Creating Expense Transaction'}"></title>
 </head>
 
 <body class="flex flex-col min-h-screen">
@@ -215,6 +215,17 @@
                         </button>
                     </div>
 
+                    <!-- Скрытые данные для восстановления списка позиций транзакции после ошибок валидации -->
+                    <div id="existing-items-data" class="hidden">
+                        <div th:each="item, stat : ${transaction.items}"
+                             class="item-data-source"
+                             th:data-name="${item.name}"
+                             th:data-price="${item.price}"
+                             th:data-quantity="${item.quantity}"
+                             th:data-amount="${item.amount}">
+                        </div>
+                    </div>
+
                     <!-- Секция списка позиций: - раскрывается НИЖЕ кнопок; - отображается ТОЛЬКО для расходов -->
                     <div th:if="${mode == 'EXPENSE'}" id="items-section" class="hidden mt-6 border-t border-gray-200 pt-6">
                         <h3 class="text-lg font-semibold text-foreground mb-4">Детализация чека</h3>
@@ -355,6 +366,32 @@
     let itemIndex = 0;
 
     /**
+     * Инициализация при загрузке страницы.
+     * Если в модели уже есть позиции (после ошибки валидации),
+     * они сразу отрисуются.
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        const existingData = document.querySelectorAll('.item-data-source');
+        if (existingData.length > 0) {
+            // Если данные есть, раскрываем секцию и отрисовываем строки
+            const section = document.getElementById('items-section');
+            const btn = document.getElementById('toggle-items-btn');
+
+            section.classList.remove('hidden');
+            btn.textContent = 'Скрыть список позиций';
+
+            existingData.forEach(data => {
+                addItem(
+                    data.getAttribute('data-name'),
+                    data.getAttribute('data-price'),
+                    data.getAttribute('data-quantity'),
+                    data.getAttribute('data-amount')
+                );
+            });
+        }
+    });
+
+    /**
      * Переключает видимость секции со списком товаров.
      * При первом открытии автоматически добавляет пустую строку.
      */
@@ -407,38 +444,46 @@
     }
 
     /**
-     * Добавляет новую строку товара в список.
-     * Копирует структуру из <template> и настраивает связи.
+     * Функция добавления строки:
+     * - Добавляет новую строку товара в список.
+     * - Копирует структуру из <template> и настраивает связи.
+     * - Может принимать начальные значения, если переданный
+     *   в форму DTO уже содержит строки позиций.
      */
-    function addItem() {
+    function addItem(name = '', price = '', qty = '', amount = '') {
         const container = document.getElementById('items-container');
         // Клонируем (берем) "пустой шаблон" из тега <template> (глубокое копирование)
         const template = document.getElementById('item-template').content.cloneNode(true);
-
         // Находим элементы внутри этого шаблона
         const row = template.querySelector('.item-row');
+
+        // Поля ввода
         const nameInput = row.querySelector('.item-name');
         const priceInput = row.querySelector('.item-price');
         const qtyInput = row.querySelector('.item-qty');
         const amountInput = row.querySelector('.item-amount');
 
-        // Настраиваем атрибуты 'name' для автоматического маппинга в Java List<TransactionItemDto>,
-        // чтобы Spring Boot понял, в какое поле DTO положить данные.
-        // Крайне важно: индекс в квадратных скобках [index]
+        // Установка существующих значений (если они переданы)
+        nameInput.value = name;
+        priceInput.value = price;
+        qtyInput.value = qty;
+        amountInput.value = amount;
+
+        // Настраиваем атрибуты 'name' для автоматического маппинга
+        // данных из формы в List<TransactionItemDto>, чтобы Spring Boot
+        // понимал, в какое поле DTO положить данные.
+        // Важно: индекс в квадратных скобках [index]
         // Формат: items[индекс].имяПоляВDto
         nameInput.setAttribute('name', `items[${itemIndex}].name`);
         priceInput.setAttribute('name', `items[${itemIndex}].price`);
         qtyInput.setAttribute('name', `items[${itemIndex}].quantity`);
         amountInput.setAttribute('name', `items[${itemIndex}].amount`);
 
-        /**
-         * Добавляем обработчик события: при изменении цены или количества пересчитывать сумму позиции
-         * Логика расчета внутри строки: Сумма = Цена * Количество
-         */
+        // Добавляем обработчик события: при изменении цены или количества пересчитывать сумму позиции
+        // Логика расчета: Сумма = Цена * Количество
         const calculateRowAmount = () => {
             const p = parseFloat(priceInput.value) || 0;
             const q = parseFloat(qtyInput.value) || 0;
-            // Считаем итог строки
             amountInput.value = (p * q).toFixed(2); // Округляем до 2 знаков (BigDecimal compatible)
 
             // Сразу после этого пересчитываем общую сумму всей транзакции
@@ -451,7 +496,6 @@
 
         // Добавляем готовую настроенную строку в конец контейнера
         container.appendChild(template);
-
         // Увеличиваем индекс, чтобы следующая строка получила следующий порядковый номер
         itemIndex++;
     }
@@ -465,9 +509,9 @@
         button.closest('.item-row').remove();
 
         // ПЕРЕИНДЕКСАЦИЯ: обязательный шаг!
-        // Если мы удалили строку №1 из трех (0, 1, 2), то оставшиеся станут 0 и 2.
+        // Если удалили строку №1 из трех (0, 1, 2), оставшиеся станут 0 и 2.
         // Spring Boot не поймет индекс 2, если нет индекса 1. Нужно сделать их 0 и 1,
-        // иначе Spring Boot не сможет корректно собрать List из-за "дырок" в нумерации.
+        // иначе Spring Boot не сможет корректно собрать List из-за пропусков в нумерации.
         reIndexItems();
 
         // Обновляем общую сумму транзакции после удаления позиции
