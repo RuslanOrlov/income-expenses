@@ -75,6 +75,9 @@
                             <div th:if="${#fields.hasErrors('amount')}">
                                 <span th:errors="*{amount}" class="text-red-500"></span>
                             </div>
+                            <div th:if="${#fields.hasErrors('items')}">
+                                <span th:errors="*{items}" class="text-red-500"></span>
+                            </div>
                         </div>
                         <!-- End Col -->
 

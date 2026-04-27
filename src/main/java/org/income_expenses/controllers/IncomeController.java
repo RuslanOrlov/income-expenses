@@ -130,7 +130,7 @@ public class IncomeController {
                                @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                @RequestParam(value = "walletId", required = false) Long walletId,
                                Model model) {
-        if (bindingResult.hasErrors()) {
+        if (incomeExpenseService.isWrongTransaction(transaction, bindingResult, "CHANGE")) {
             for (ObjectError error : bindingResult.getAllErrors()) {
                 log.info("--- error {}", error.getDefaultMessage());
             }
@@ -175,7 +175,7 @@ public class IncomeController {
                                @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                @RequestParam(value = "walletId", required = false) Long walletId,
                                Model model) {
-        if (bindingResult.hasErrors()) {
+        if (incomeExpenseService.isWrongTransaction(transaction, bindingResult, "CREATE")) {
             for (ObjectError error : bindingResult.getAllErrors()) {
                 log.info("--- error {}", error.getDefaultMessage());
             }

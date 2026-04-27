@@ -2,6 +2,7 @@ package org.income_expenses.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -189,5 +192,74 @@ public class IncomeExpenseService {
         return walletMemberRepository
                 .findByMember(user)
                 .orElseThrow(() -> new NoSuchElementException("No wallet member found"));
+    }
+
+    public boolean isWrongTransaction(TransactionDto transaction, BindingResult bindingResult, String mode) {
+        boolean result = false;
+        TransactionCategory category = transaction.getCategory();
+        switch (category) {
+            case INCOME:
+                result = isWrongIncomeTransaction(transaction, bindingResult, mode);
+                break;
+            case EXPENSE:
+                result = isWrongExpenseTransaction(transaction, bindingResult, mode);
+                break;
+        }
+        return result;
+    }
+
+    private boolean isWrongIncomeTransaction(TransactionDto transaction,
+                                             BindingResult bindingResult,
+                                             String mode) {
+        boolean result = false;
+
+        if (bindingResult.hasErrors()) {
+            switch (mode.toUpperCase()) {
+                case "CREATE":
+                    result = true;
+                    break;
+                case "CHANGE":
+                    for (FieldError error : bindingResult.getFieldErrors()) {
+                        if (error.getField().equals("organization") || error.getField().equals("transactionType")) {
+                            result = true;
+                        }
+                    };
+                    break;
+            }
+        }
+
+        return result;
+    }
+
+    private boolean isWrongExpenseTransaction(TransactionDto transaction,
+                                              BindingResult bindingResult,
+                                              String mode) {
+        boolean result = false;
+
+        if (bindingResult.hasErrors()) {
+            switch (mode.toUpperCase()) {
+                case "CREATE":
+                    result = true;
+                    break;
+                case "CHANGE":
+                    for (FieldError error : bindingResult.getFieldErrors()) {
+                        if (error.getField().equals("organization") || error.getField().equals("transactionType")) {
+                            result = true;
+                        }
+                    };
+                    break;
+            }
+        }
+        if (transaction.getItems().size() > 0) { // item.getAmount() может вернуть null, проверить и доработать
+            BigDecimal total = transaction.getItems().stream()
+                    .map(item -> item.getAmount())
+                    .reduce(BigDecimal.ZERO, (a, b) -> a.add(b)).abs();
+            if (transaction.getAmount() != null && total.compareTo(transaction.getAmount().abs()) != 0) {
+                bindingResult.rejectValue("items", null, "The total amount of items does not match the transaction amount");
+                result = true;
+            }
+        }
+
+        return result;
     }
 }
