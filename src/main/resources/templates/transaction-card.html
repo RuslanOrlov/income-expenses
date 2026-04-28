@@ -387,21 +387,6 @@
         qtyInput.setAttribute('name', `items[${itemIndex}].quantity`);
         amountInput.setAttribute('name', `items[${itemIndex}].amount`);
 
-        // Добавляем обработчик события: при изменении цены или количества пересчитывать сумму позиции
-        // Логика расчета: Сумма = Цена * Количество
-        /*const calculateRowAmount = () => {
-            const p = parseFloat(priceInput.value) || 0;
-            const q = parseFloat(qtyInput.value) || 0;
-            amountInput.value = (p * q).toFixed(2); // Округляем до 2 знаков (BigDecimal compatible)
-
-            // Сразу после этого пересчитываем общую сумму всей транзакции
-            updateGlobalTotal();
-        };*/
-
-        // Слушаем любые изменения (ввод цифр, удаление, вставка) в полях Цены и Количества
-        /*priceInput.addEventListener('input', calculateRowAmount);
-        qtyInput.addEventListener('input', calculateRowAmount);*/
-
         // Добавляем готовую настроенную строку в конец контейнера
         container.appendChild(template);
         // Увеличиваем индекс, чтобы следующая строка получила следующий порядковый номер
