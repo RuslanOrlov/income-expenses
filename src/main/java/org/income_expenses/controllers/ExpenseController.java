@@ -100,6 +100,7 @@ public class ExpenseController {
         model.addAttribute("transaction", transaction);
         model.addAttribute("selectedWalletId", walletId);
         model.addAttribute("curPage", curPage);
+        model.addAttribute("mode", "EXPENSE");
 
         return "transaction-card";
     }
@@ -165,7 +166,6 @@ public class ExpenseController {
         model.addAttribute("curPage", curPage);
         model.addAttribute("selectedWalletId", walletId);
         model.addAttribute("mode", "EXPENSE");
-        model.addAttribute("showItems", false);
         return "transaction-create";
     }
 
@@ -188,7 +188,6 @@ public class ExpenseController {
             model.addAttribute("curPage", curPage);
             model.addAttribute("selectedWalletId", walletId);
             model.addAttribute("mode", "EXPENSE");
-            model.addAttribute("showItems", false);
             return "transaction-create";
         }
 

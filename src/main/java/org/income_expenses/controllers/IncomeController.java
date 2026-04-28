@@ -100,6 +100,7 @@ public class IncomeController {
         model.addAttribute("transaction", transaction);
         model.addAttribute("selectedWalletId", walletId);
         model.addAttribute("curPage", curPage);
+        model.addAttribute("mode", "INCOME");
 
         return "transaction-card";
     }

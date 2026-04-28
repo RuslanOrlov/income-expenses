@@ -2,7 +2,6 @@ package org.income_expenses.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.income_expenses.dto.TransactionDto;
@@ -199,7 +198,7 @@ public class IncomeExpenseService {
         TransactionCategory category = transaction.getCategory();
         switch (category) {
             case INCOME:
-                result = isWrongIncomeTransaction(transaction, bindingResult, mode);
+                result = isWrongIncomeTransaction(bindingResult, mode);
                 break;
             case EXPENSE:
                 result = isWrongExpenseTransaction(transaction, bindingResult, mode);
@@ -208,27 +207,10 @@ public class IncomeExpenseService {
         return result;
     }
 
-    private boolean isWrongIncomeTransaction(TransactionDto transaction,
-                                             BindingResult bindingResult,
+    private boolean isWrongIncomeTransaction(BindingResult bindingResult,
                                              String mode) {
-        boolean result = false;
-
-        if (bindingResult.hasErrors()) {
-            switch (mode.toUpperCase()) {
-                case "CREATE":
-                    result = true;
-                    break;
-                case "CHANGE":
-                    for (FieldError error : bindingResult.getFieldErrors()) {
-                        if (error.getField().equals("organization") || error.getField().equals("transactionType")) {
-                            result = true;
-                        }
-                    };
-                    break;
-            }
-        }
-
-        return result;
+        // Выполняем базовую проверку приходной транзакции на корректность
+        return baseValidationForTransaction(bindingResult, mode);
     }
 
     private boolean isWrongExpenseTransaction(TransactionDto transaction,
@@ -236,6 +218,29 @@ public class IncomeExpenseService {
                                               String mode) {
         boolean result = false;
 
+        // Выполняем базовую проверку расходной транзакции на корректность
+        result = baseValidationForTransaction(bindingResult, mode);
+
+        // Проверяем соответствие общей суммы всех позиций
+        // расходной транзакции и суммы самой транзакции
+        if (transaction.getItems().size() > 0) {
+            BigDecimal total = transaction.getItems().stream()
+                    .map(item -> item.getAmount())
+                    // item.getAmount() теоретически может вернуть null --> теоретически требуется доработка
+                    // на самом деле форма transaction-create не позволяет вводить позиции с нулевой суммой
+                    .reduce(BigDecimal.ZERO, (a, b) -> a.add(b)).abs();
+            if (transaction.getAmount() != null && total.compareTo(transaction.getAmount().abs()) != 0) {
+                bindingResult.rejectValue("items", null, "Общая сумма позиций не соответствует сумме транзакции");
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    private static boolean baseValidationForTransaction(BindingResult bindingResult, String mode) {
+        boolean result = false;
+
         if (bindingResult.hasErrors()) {
             switch (mode.toUpperCase()) {
                 case "CREATE":
@@ -248,15 +253,6 @@ public class IncomeExpenseService {
                         }
                     };
                     break;
-            }
-        }
-        if (transaction.getItems().size() > 0) { // item.getAmount() может вернуть null, проверить и доработать
-            BigDecimal total = transaction.getItems().stream()
-                    .map(item -> item.getAmount())
-                    .reduce(BigDecimal.ZERO, (a, b) -> a.add(b)).abs();
-            if (transaction.getAmount() != null && total.compareTo(transaction.getAmount().abs()) != 0) {
-                bindingResult.rejectValue("items", null, "The total amount of items does not match the transaction amount");
-                result = true;
             }
         }
 
