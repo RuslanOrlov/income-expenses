@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
+    <title th:text="${mode == 'INCOME' ? 'Creating Income Transaction' : 'Creating Expense Transaction'}"></title>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+<header class="flex-none flex flex-wrap sm:justify-start sm:flex-nowrap w-full py-3 bg-navbar border-b border-navbar-line">
+    <nav class="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between">
+        <a class="flex-none font-bold text-xl text-foreground focus:outline-hidden focus:opacity-80" th:href="@{/}" aria-label="Brand">
+            <h1 class="m-0">Управление персональными финансами</h1>
+        </a>
+        <div class="flex flex-row items-center gap-5 mt-5 sm:justify-end sm:mt-0 sm:ps-5">
+            <a class="text-sm font-medium text-primary-active focus:outline-hidden" href="#" aria-current="page">Семейный счет</a>
+            <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus" href="#">Доходы</a>
+            <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus" href="#">Расходы</a>
+            <a class="text-sm text-navbar-nav-foreground hover:text-primary-hover focus:outline-hidden focus:text-primary-focus" href="#">Аналитика и отчеты</a>
+
+            <!-- Вертикальный разделитель (опционально) НЕ ОТОБРАЖАЕТСЯ  -->
+            <div class="hidden sm:block flex-none w-[2px] h-6 bg-gray-200 mx-2"></div>
+
+            <!-- Кнопки действий -->
+            <div class="flex items-center gap-x-3">
+                <a sec:authorize="isAnonymous()" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/login}">Войти</a>
+                <a sec:authorize="isAuthenticated()" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/logout-confirm}">Выйти</a>
+                <a sec:authorize="isAnonymous()" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/register}">Зарегистрироваться</a>
+                <a class="size-[40px] inline-flex items-center justify-center rounded-lg border border-blue-600 text-blue-600 hover:border-blue-500 hover:text-blue-500 hover:bg-gray-100 focus:outline-hidden overflow-hidden disabled:opacity-50 disabled:pointer-events-none"
+                   th:href="@{/settings}">
+                    <img src="https://pngicon.ru/file/uploads/2_43.png" alt="Администрирование" class="size-[30px] object-contain">
+                </a>
+            </div>
+
+        </div>
+    </nav>
+</header>
+
+<main class="flex flex-1 overflow-hidden">
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto w-full px-4 sm:px-6 md:px-8">
+        <!-- Card Section -->
+        <div class="max-w-4xl px-4 py-10 sm:px-6 lg:px-8 mx-auto"><!-- Card -->
+            <!-- Card -->
+            <div class="bg-layer rounded-xl shadow-xs p-4 sm:p-7">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-foreground">
+                        <span th:text="${title}"></span>
+                    </h2>
+                </div>
+
+                <form th:method="post" th:action="@{{path}/create(path=${mainPath}, walletId=${selectedWalletId})}" th:object="${transaction}">
+                    <!-- Grid -->
+                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+
+                        <div class="sm:col-span-3">
+                            <label for="total-transaction-amount" class="inline-block text-sm text-foreground mt-2.5">
+                                Сумма транзакции <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <input id="total-transaction-amount"
+                                   type="number" th:field="*{amount}"
+                                   step="0.01" placeholder="0.00"
+                                   class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
+                            <div th:if="${#fields.hasErrors('amount')}">
+                                <span th:errors="*{amount}" class="text-red-500"></span>
+                            </div>
+                            <div th:if="${#fields.hasErrors('items')}">
+                                <span th:errors="*{items}" class="text-red-500"></span>
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="whenPerformed" class="inline-block text-sm text-foreground mt-2.5">
+                                Дата транзакции <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <input id="whenPerformed" type="datetime-local" th:field="*{whenPerformed}" placeholder="дата транзакции"
+                                   class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
+                            <div th:if="${#fields.hasErrors('whenPerformed')}">
+                                <span th:errors="*{whenPerformed}" class="text-red-500"></span>
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="organization" class="inline-block text-sm text-foreground mt-2.5">
+                                <span th:text="${mode == 'INCOME' ? 'Источник дохода' : 'Где потрачено'}"></span>
+                                <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <div class="space-y-2">
+
+                                <select id="organization" th:field="*{organization}"
+                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
+                                    <option value="">
+                                        <span th:text="${mode == 'INCOME' ? '--- Выберите источник дохода ---' : '--- Выберите где потрачено ---'}"></span>
+                                    </option>
+                                    <option th:each="org : ${organizations}"
+                                            th:value="${org.id}"
+                                            th:text="${org.organizationName}">Transaction Type Name</option>
+                                </select>
+
+                                <div th:if="${#fields.hasErrors('organization')}">
+                                    <span th:errors="*{organization}" class="text-red-500"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="transactionType" class="inline-block text-sm text-foreground mt-2.5">
+                                Тип транзакции <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <div class="space-y-2">
+
+                                <select id="transactionType" th:field="*{transactionType}"
+                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
+                                    <option value="">--- Выберите тип транзакции ---</option>
+                                    <option th:each="type : ${types}"
+                                            th:value="${type.id}"
+                                            th:text="${type.transactionTypeName}">Transaction Type Name</option>
+                                </select>
+
+                                <div th:if="${#fields.hasErrors('transactionType')}">
+                                    <span th:errors="*{transactionType}" class="text-red-500"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="category" class="inline-block text-sm text-foreground mt-2.5">
+                                Категория транзакции <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <div class="space-y-2">
+                                <!-- для контроллера -->
+                                <input type="hidden" th:field="*{category}">
+                                <!-- для визуального отображения в UI -->
+                                <select id="category" th:field="*{category}" disabled
+                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
+                                    <option th:each="categoryVal : ${T(org.income_expenses.models.TransactionCategory).values()}"
+                                            th:value="${categoryVal}"
+                                            th:text="${categoryVal}"></option>
+                                </select>
+
+                                <div th:if="${#fields.hasErrors('category')}">
+                                    <span th:errors="*{category}" class="text-red-500"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="description" class="inline-block text-sm text-foreground mt-2.5">
+                                Описание (опционально)
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <textarea id="description" th:field="*{description}" class="py-1.5 sm:py-2 px-3 block block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none"
+                                      rows="2" placeholder="краткое описание (комментарий)"></textarea>
+                        </div>
+                        <!-- End Col -->
+
+                    </div>
+                    <!-- End Grid -->
+
+                    <!-- Блок основных кнопок управления -->
+                    <div class="mt-5 flex justify-end gap-x-2">
+                        <!-- Кнопка "Показать список" отображается ТОЛЬКО для расходов -->
+                        <button th:if="${mode == 'EXPENSE'}"
+                                id="toggle-items-btn"
+                                type="button"
+                                onclick="toggleItems()"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-sm hover:bg-gray-100">
+                            Показать список позиций
+                        </button>
+
+                        <button type="button"
+                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-sm hover:bg-gray-100">
+                            Вернуться
+                        </button>
+
+                        <button type="submit"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover">
+                            Создать транзакцию
+                        </button>
+                    </div>
+
+                    <!-- Скрытые данные для восстановления списка позиций транзакции после ошибок валидации -->
+                    <div id="existing-items-data" class="hidden">
+                        <div th:each="item, stat : ${transaction.items}"
+                             class="item-data-source"
+                             th:data-name="${item.name}"
+                             th:data-price="${item.price}"
+                             th:data-quantity="${item.quantity}"
+                             th:data-amount="${item.amount}">
+                        </div>
+                    </div>
+
+                    <!-- Секция списка позиций: - раскрывается НИЖЕ кнопок; - отображается ТОЛЬКО для расходов -->
+                    <div th:if="${mode == 'EXPENSE'}" id="items-section" class="hidden mt-6 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-foreground mb-4">Детализация чека</h3>
+
+                        <!-- Контейнер для динамических строк -->
+                        <div id="items-container" class="space-y-3"></div>
+
+                        <button type="button" onclick="addItem()"
+                                class="mt-3 py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-dashed border-gray-300 text-gray-600 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 focus:ring-2 focus:ring-gray-200">
+                            + Добавить товар/услугу
+                        </button>
+                    </div>
+
+                    <!-- Шаблон строки обернут в th:if, чтобы не загромождать DOM при вводе доходов (не рендерится браузером) -->
+                    <template th:if="${mode == 'EXPENSE'}" id="item-template">
+                        <!-- Используем grid-cols-12. Итоговая сумма колонок (span) должна быть равна 12 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 item-row bg-gray-50 p-2 rounded-lg border border-gray-100 mb-2 items-end">
+
+                            <!-- Наименование: даем больше всего места (5 колонок из 12) -->
+                            <div class="sm:col-span-5">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Наименование</label>
+                                <input type="text" class="item-name py-2 px-3 block w-full border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Товар..." required>
+                            </div>
+
+                            <!-- Цена: 2 колонки -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Цена</label>
+                                <input type="number" step="0.01" class="item-price py-2 px-3 block w-full border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00" required>
+                            </div>
+
+                            <!-- Кол-во: 2 колонки -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Кол-во</label>
+                                <input type="number" step="0.01" class="item-qty py-2 px-3 block w-full border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="1" required>
+                            </div>
+
+                            <!-- Сумма: 2 колонки -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 ml-1">Сумма</label>
+                                <input type="number" step="0.01" class="item-amount py-2 px-3 block w-full border-gray-200 rounded-lg text-sm bg-gray-100 font-semibold" readonly>
+                            </div>
+
+                            <!-- Кнопка удаления: 1 колонка -->
+                            <div class="sm:col-span-1 flex justify-center pb-2">
+                                <button type="button" onclick="removeItem(this)" class="text-red-400 hover:text-red-600 transition p-2">
+                                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!--<div class="mt-5 flex justify-end gap-x-2">
+                        <button th:if="${mode == 'EXPENSE'}"
+                                type="button"
+                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
+                            Показать список позиций
+                        </button>
+                        <button type="button"
+                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
+                            Вернуться
+                        </button>
+                        <button type="submit"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none">
+                            Создать транзакцию
+                        </button>
+                    </div>-->
+
+                </form>
+            </div>
+            <!-- End Card -->
+        </div>
+        <!-- End Card Section -->
+    </div>
+    <!-- End Content -->
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer class="flex-none w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-6 border-t border-footer-line">
+        <div class="flex flex-wrap justify-between items-center gap-2">
+            <div>
+                <p class="text-xs text-muted-foreground-2">
+                    © 2026 Preline Labs.
+                </p>
+            </div>
+            <!-- End Col -->
+
+            <!-- List -->
+            <ul class="flex flex-wrap items-center">
+                <li class="inline-block relative pe-4 text-xs last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-1.5 before:-translate-y-1/2 before:size-[3px] before:rounded-full before:bg-surface-3">
+                    <a class="text-xs text-muted-foreground-1 underline hover:text-primary-hover hover:decoration-2 focus:outline-hidden focus:decoration-2" href="#">
+                        X (Twitter)
+                    </a>
+                </li>
+                <li class="inline-block relative pe-4 text-xs last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-1.5 before:-translate-y-1/2 before:size-[3px] before:rounded-full before:bg-surface-3">
+                    <a class="text-xs text-muted-foreground-1 underline hover:text-primary-hover hover:decoration-2 focus:outline-hidden focus:decoration-2" href="#">
+                        Dribbble
+                    </a>
+                </li>
+                <li class="inline-block pe-4 text-xs">
+                    <a class="text-xs text-muted-foreground-1 underline hover:text-primary-hover hover:decoration-2 focus:outline-hidden focus:decoration-2" href="#">
+                        Github
+                    </a>
+                </li>
+                <li class="inline-block">
+                    <!-- Dark Mode -->
+                    <button type="button" class="hs-dark-mode hs-dark-mode-active:hidden relative flex justify-center items-center size-7 bg-layer border border-layer-line text-layer-foreground rounded-full hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus" data-hs-theme-click-value="dark">
+                        <span class="sr-only">Dark</span>
+                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                    </button>
+                    <button type="button" class="hs-dark-mode hs-dark-mode-active:flex hidden relative flex justify-center items-center size-7 bg-layer border border-layer-line text-layer-foreground rounded-full hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus" data-hs-theme-click-value="light">
+                        <span class="sr-only">Light</span>
+                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+                    </button>
+                    <!-- End Dark Mode -->
+                </li>
+            </ul>
+            <!-- End List -->
+        </div>
+    </div>
+</footer>
+<!-- ========== END FOOTER ========== -->
+
+<script th:src="@{/js/preline.js}"></script>                 <!-- Preline UI -->
+
+<script>
+    /**
+     * ПЕРЕМЕННЫЕ И ПРИНЦИПЫ:
+     * itemIndex — глобальный счетчик строк для отслеживания количества позиций.
+     * Он критически важен для Spring Boot.
+     * Поля должны иметь имена вида items[0].name, items[1].name и т.д.
+     * Если в нумерации будет пропуск (например, 0, 2, 3), Spring выдаст ошибку.
+     */
+    let itemIndex = 0;
+
+    /**
+     * Инициализация при загрузке страницы.
+     * Если в модели уже есть позиции (после ошибки валидации),
+     * они сразу отрисуются.
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        const existingData = document.querySelectorAll('.item-data-source');
+        if (existingData.length > 0) {
+            // Если данные есть, раскрываем секцию и отрисовываем строки
+            const section = document.getElementById('items-section');
+            const btn = document.getElementById('toggle-items-btn');
+
+            section.classList.remove('hidden');
+            btn.textContent = 'Скрыть список позиций';
+
+            existingData.forEach(data => {
+                addItem(
+                    data.getAttribute('data-name'),
+                    data.getAttribute('data-price'),
+                    data.getAttribute('data-quantity'),
+                    data.getAttribute('data-amount')
+                );
+            });
+        }
+    });
+
+    /**
+     * Переключает видимость секции со списком товаров.
+     * При первом открытии автоматически добавляет пустую строку.
+     */
+    function toggleItems() {
+        const section = document.getElementById('items-section');
+        const btn = document.getElementById('toggle-items-btn');
+
+        // Проверяем, скрыт ли элемент сейчас (Tailwind класс 'hidden')
+        if (section.classList.contains('hidden')) {
+            // Показываем секцию
+            section.classList.remove('hidden');
+            // Меняем надпись на кнопке
+            btn.textContent = 'Скрыть список позиций';
+
+            // Если пользователь открыл список впервые и там еще нет строк,
+            // автоматически добавляем первую пустую строку для удобства
+            if (itemIndex === 0) {
+                addItem();
+            }
+
+            // Плавно прокручиваем (скроллим) страницу к началу списка
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            section.classList.add('hidden'); // Прячем секцию
+            btn.textContent = 'Показать список позиций'; // Возвращаем исходный текст
+        }
+    }
+
+    /**
+     * Рассчитывает общую сумму всей транзакции.
+     * Пробегает по всем строкам, суммирует их итоги и пишет результат в главное поле.
+     */
+    function updateGlobalTotal() {
+        // Выбираем все поля "Сумма" во всех строках позиций
+        const allItemAmounts = document.querySelectorAll('.item-amount');
+        let total = 0;
+
+        allItemAmounts.forEach(input => {
+            // Преобразуем текст из поля в число. Если там пусто — берем 0.
+            const value = parseFloat(input.value) || 0;
+            total += value;
+        });
+
+        // Находим основное поле суммы транзакции (id="total-transaction-amount")
+        const globalTotalInput = document.getElementById('total-transaction-amount');
+        if (globalTotalInput) {
+            // Записываем итоговую сумму, округленную до 2 знаков для BigDecimal
+            globalTotalInput.value = total.toFixed(2);
+        }
+    }
+
+    /**
+     * Функция добавления строки:
+     * - Добавляет новую строку товара в список.
+     * - Копирует структуру из <template> и настраивает связи.
+     * - Может принимать начальные значения, если переданный
+     *   в форму DTO уже содержит строки позиций.
+     */
+    function addItem(name = '', price = '', qty = '', amount = '') {
+        const container = document.getElementById('items-container');
+        // Клонируем (берем) "пустой шаблон" из тега <template> (глубокое копирование)
+        const template = document.getElementById('item-template').content.cloneNode(true);
+        // Находим элементы внутри этого шаблона
+        const row = template.querySelector('.item-row');
+
+        // Поля ввода
+        const nameInput = row.querySelector('.item-name');
+        const priceInput = row.querySelector('.item-price');
+        const qtyInput = row.querySelector('.item-qty');
+        const amountInput = row.querySelector('.item-amount');
+
+        // Установка существующих значений (если они переданы)
+        nameInput.value = name;
+        priceInput.value = price;
+        qtyInput.value = qty;
+        amountInput.value = amount;
+
+        // Настраиваем атрибуты 'name' для автоматического маппинга
+        // данных из формы в List<TransactionItemDto>, чтобы Spring Boot
+        // понимал, в какое поле DTO положить данные.
+        // Важно: индекс в квадратных скобках [index]
+        // Формат: items[индекс].имяПоляВDto
+        nameInput.setAttribute('name', `items[${itemIndex}].name`);
+        priceInput.setAttribute('name', `items[${itemIndex}].price`);
+        qtyInput.setAttribute('name', `items[${itemIndex}].quantity`);
+        amountInput.setAttribute('name', `items[${itemIndex}].amount`);
+
+        // Добавляем обработчик события: при изменении цены или количества пересчитывать сумму позиции
+        // Логика расчета: Сумма = Цена * Количество
+        const calculateRowAmount = () => {
+            const p = parseFloat(priceInput.value) || 0;
+            const q = parseFloat(qtyInput.value) || 0;
+            amountInput.value = (p * q).toFixed(2); // Округляем до 2 знаков (BigDecimal compatible)
+
+            // Сразу после этого пересчитываем общую сумму всей транзакции
+            updateGlobalTotal();
+        };
+
+        // Слушаем любые изменения (ввод цифр, удаление, вставка) в полях Цены и Количества
+        priceInput.addEventListener('input', calculateRowAmount);
+        qtyInput.addEventListener('input', calculateRowAmount);
+
+        // Добавляем готовую настроенную строку в конец контейнера
+        container.appendChild(template);
+        // Увеличиваем индекс, чтобы следующая строка получила следующий порядковый номер
+        itemIndex++;
+    }
+
+    /**
+     * Удаляет выбранную строку.
+     * @param {HTMLElement} button — элемент кнопки удаления (this)
+     */
+    function removeItem(button) {
+        // Ищем ближайшего родителя с классом .item-row и удаляем его из DOM
+        button.closest('.item-row').remove();
+
+        // ПЕРЕИНДЕКСАЦИЯ: обязательный шаг!
+        // Если удалили строку №1 из трех (0, 1, 2), оставшиеся станут 0 и 2.
+        // Spring Boot не поймет индекс 2, если нет индекса 1. Нужно сделать их 0 и 1,
+        // иначе Spring Boot не сможет корректно собрать List из-за пропусков в нумерации.
+        reIndexItems();
+
+        // Обновляем общую сумму транзакции после удаления позиции
+        updateGlobalTotal();
+    }
+
+    /**
+     * Проходит по всем существующим строкам и заново проставляет им индексы 0, 1, 2...
+     * Это гарантирует, что список данных уйдет на сервер без "дырок" в массиве.
+     */
+    function reIndexItems() {
+        const rows = document.querySelectorAll('.item-row');
+        itemIndex = 0; // Сбрасываем глобальный счетчик
+
+        rows.forEach(row => {
+            // Обновляем атрибуты name для каждого поля в строке
+            row.querySelector('.item-name').setAttribute('name', `items[${itemIndex}].name`);
+            row.querySelector('.item-price').setAttribute('name', `items[${itemIndex}].price`);
+            row.querySelector('.item-qty').setAttribute('name', `items[${itemIndex}].quantity`);
+            row.querySelector('.item-amount').setAttribute('name', `items[${itemIndex}].amount`);
+
+            // Увеличиваем счетчик для следующей итерации цикла
+            itemIndex++;
+        });
+    }
+</script>
+
+</body>
+</html>
