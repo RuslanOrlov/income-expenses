@@ -55,7 +55,12 @@ public class DirectoryOfPersonalFinanceController {
     }
 
     @GetMapping("/tranasction-types/{id:\\d+}")
-    public String getTransactionTypeById(@PathVariable Long id) {
+    public String getTransactionTypeById(@PathVariable Long id, Model model,
+                                         @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
+        model.addAttribute("transactionType", directoryService.getTransactionTypeById(id));
+        model.addAttribute("curPage", curPage);
+        model.addAttribute("mainPath", "/finance/directories/tranasction-types");
+        model.addAttribute("title", "Просмотр карточки типа транзакции");
         return "directory-transaction-type-card";
     }
 
