@@ -2,6 +2,7 @@ package org.income_expenses.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.income_expenses.dto.TransactionTypeDto;
 
 import java.time.LocalDateTime;
 
@@ -22,4 +23,12 @@ public class TransactionType {
     private TransactionCategory category;
 
     private LocalDateTime createdAt;
+
+    public TransactionTypeDto toDto() {
+        return TransactionTypeDto.builder()
+                .id(id)
+                .transactionTypeName(transactionTypeName)
+                .category(category)
+                .build();
+    }
 }

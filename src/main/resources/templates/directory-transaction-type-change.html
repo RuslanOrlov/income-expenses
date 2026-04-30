@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
-    <title>Changing Income Transaction</title>
+    <title>Changing Transaction Type</title>
 </head>
 
 <body class="flex flex-col min-h-screen">
@@ -56,7 +56,7 @@
                     </h2>
                 </div>
 
-                <form th:method="post" th:action="@{{path}/{id}/change(path=${mainPath}, id=${transaction.id}, curPage=${curPage}, walletId=${selectedWalletId})}" th:object="${transaction}">
+                <form th:method="post" th:action="@{{path}/{id}/change(path=${mainPath}, id=${transactionType.id}, curPage=${curPage})}" th:object="${transactionType}">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
@@ -64,132 +64,62 @@
                         <input type="hidden" th:field="*{id}">
 
                         <div class="sm:col-span-3">
-                            <label for="amount" class="inline-block text-sm text-foreground mt-2.5">
-                                Сумма транзакции
+                            <label for="id" class="inline-block text-sm text-foreground mt-2.5">
+                                Id
                             </label>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <!-- для контроллера -->
-                            <input type="hidden" th:field="*{amount}">
-                            <!-- для визуального отображения в UI -->
-                            <input id="amount" type="text" th:value="*{#numbers.formatDecimal(amount, 1, 'WHITESPACE', 2, 'COMMA')}"
-                                   readonly placeholder="сумма транзакции"
+                            <input id="id" type="text" th:field="*{id}" readonly
                                    class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="whenPerformed" class="inline-block text-sm text-foreground mt-2.5">
-                                Дата транзакции
+                            <label for="transactionTypeName" class="inline-block text-sm text-foreground mt-2.5">
+                                Наименование типа транзакции <span class="text-red-500">*</span>
                             </label>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <!-- для контроллера -->
-                            <input type="hidden" th:field="*{whenPerformed}">
-                            <!-- для визуального отображения в UI -->
-                            <input id="whenPerformed" type="text" th:value="*{#temporals.format(whenPerformed, 'dd-MM-yyyy HH:mm')}"
-                                   readonly placeholder="дата транзакции"
+                            <input id="transactionTypeName" type="text" th:field="*{transactionTypeName}"
                                    class="py-1.5 sm:py-2 px-3 block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none">
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="organization" class="inline-block text-sm text-foreground mt-2.5">
-                                Источник дохода <span class="text-red-500">*</span>
-                            </label>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-9">
-                            <div class="space-y-2">
-
-                                <select id="organization" th:field="*{organization}"
-                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
-                                    <!--  <option value="">--- Выберите источник дохода ---</option> -->
-                                     <option th:each="org : ${organizations}"
-                                             th:value="${org.id}"
-                                             th:text="${org.organizationName}">Transaction Type Name</option>
-                                 </select>
-
-                                 <div th:if="${#fields.hasErrors('organization')}">
-                                     <span th:errors="*{organization}" class="text-red-500"></span>
-                                 </div>
-
-                             </div>
-                         </div>
-                         <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="transactionType" class="inline-block text-sm text-foreground mt-2.5">
-                                Тип транзакции <span class="text-red-500">*</span>
-                            </label>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-9">
-                            <div class="space-y-2">
-
-                                <select id="transactionType" th:field="*{transactionType}"
-                                        class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
-                                    <!--  <option value="">--- Выберите тип транзакции ---</option> -->
-                                    <option th:each="type : ${types}"
-                                            th:value="${type.id}"
-                                            th:text="${type.transactionTypeName}">Transaction Type Name</option>
-                                </select>
-
-                                <div th:if="${#fields.hasErrors('transactionType')}">
-                                    <span th:errors="*{transactionType}" class="text-red-500"></span>
-                                </div>
-
+                            <div th:if="${#fields.hasErrors('transactionTypeName')}">
+                                <span th:errors="*{transactionTypeName}" class="text-red-500"></span>
                             </div>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
                             <label for="category" class="inline-block text-sm text-foreground mt-2.5">
-                                Категория транзакции
+                                Категория транзакции <span class="text-red-500">*</span>
                             </label>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
                             <div class="space-y-2">
-                                <!-- для контроллера -->
-                                <input type="hidden" th:field="*{category}">
-                                <!-- для визуального отображения в UI -->
-                                <select id="category" th:field="*{category}" disabled
+                                <select id="category" th:field="*{category}"
                                         class="bg-layer border-layer-line text-layer-foreground rounded-lg text-sm focus:border-primary-focus focus:ring-primary-focus">
-                                    <option th:if="*{category != null}" th:value="*{category.name()}" th:text="*{category.name()}"></option>
-                                    <option th:unless="*{category != null}" th:value="Не присвоено"></option>
+                                    <option th:each="categoryVal : ${T(org.income_expenses.models.TransactionCategory).values()}"
+                                            th:value="${categoryVal}"
+                                            th:text="${categoryVal}"></option>
                                 </select>
+
+                                <div th:if="${#fields.hasErrors('category')}">
+                                    <span th:errors="*{category}" class="text-red-500"></span>
+                                </div>
                             </div>
                         </div>
                         <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="description" class="inline-block text-sm text-foreground mt-2.5">
-                                Описание (опционально)
-                            </label>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-9">
-                            <textarea id="description" th:field="*{description}"
-                                      class="py-1.5 sm:py-2 px-3 block block w-full bg-layer border-layer-line shadow-2xs sm:text-sm rounded-lg text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus disabled:opacity-50 disabled:pointer-events-none"
-                                      rows="2" placeholder="краткое описание (комментарий)"></textarea>
-                        </div>
-                        <!-- End Col -->
-
                     </div>
                     <!-- End Grid -->
 
                     <div class="mt-5 flex justify-end gap-x-2">
                         <button type="button"
-                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage}, walletId=${selectedWalletId})}'|"
+                                th:onclick="|window.location.href = '@{{path}(path=${mainPath}, curPage=${curPage})}'|"
                                 class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus">
                             Вернуться
                         </button>
