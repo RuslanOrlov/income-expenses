@@ -89,6 +89,16 @@
                             <div th:if="${#fields.hasErrors('transactionTypeName')}">
                                 <span th:errors="*{transactionTypeName}" class="text-red-500"></span>
                             </div>
+                            <!-- Здесь выводится глобальная ошибка сущности - если в БД уже
+                             существует тип транзакции с таким же названием и категорией -->
+                            <div th:if="${#fields.hasGlobalErrors()}">
+                                <ul>
+                                    <li th:each="error : ${#fields.globalErrors()}"
+                                        th:text="${error}"
+                                        class="text-red-500">
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                         <!-- End Col -->
 

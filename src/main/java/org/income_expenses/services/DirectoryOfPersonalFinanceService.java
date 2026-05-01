@@ -3,6 +3,7 @@ package org.income_expenses.services;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.income_expenses.dto.TransactionTypeDto;
+import org.income_expenses.models.TransactionCategory;
 import org.income_expenses.models.TransactionType;
 import org.income_expenses.repositories.TransactionTypeRepository;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import java.time.LocalDateTime;
 
@@ -47,5 +49,17 @@ public class DirectoryOfPersonalFinanceService {
 
     public void deleteTransactionType(Long id) {
         transactionTypeRepository.deleteById(id);
+    }
+
+    public boolean isTransactionTypeExists(TransactionTypeDto transactionType, BindingResult bindingResult) {
+        String transactionTypeName = transactionType.getTransactionTypeName();
+        TransactionCategory category = transactionType.getCategory();
+        return transactionTypeRepository.existsByTransactionTypeNameIgnoringCaseAndCategory(transactionTypeName, category);
+    }
+
+    public boolean isUpdatedTransactionTypeExists(TransactionTypeDto transactionType, BindingResult bindingResult, Long id) {
+        String transactionTypeName = transactionType.getTransactionTypeName();
+        TransactionCategory category = transactionType.getCategory();
+        return transactionTypeRepository.existsByTransactionTypeNameIgnoringCaseAndCategoryAndIdNot(transactionTypeName, category, id);
     }
 }

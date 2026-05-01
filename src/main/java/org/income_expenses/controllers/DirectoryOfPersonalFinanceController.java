@@ -81,6 +81,10 @@ public class DirectoryOfPersonalFinanceController {
     @PostMapping("/tranasction-types/create")
     public String createTransactionType(@ModelAttribute("transactionType") @Valid TransactionTypeDto transactionType,
                                         BindingResult bindingResult, Model model) {
+        if (directoryService.isTransactionTypeExists(transactionType, bindingResult)) {
+            bindingResult.reject("transactionType.exists",
+                    "Тип транзакции с таким же наименованием и категорией уже существует");
+        }
         if (bindingResult.hasErrors()) {
             model.addAttribute("transactionType", transactionType);
             model.addAttribute("categories", TransactionCategory.values());
@@ -112,6 +116,10 @@ public class DirectoryOfPersonalFinanceController {
                                       @Valid @ModelAttribute("transactionType") TransactionTypeDto transactionType,
                                       BindingResult bindingResult, Model model,
                                       @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
+        if (directoryService.isUpdatedTransactionTypeExists(transactionType, bindingResult, id)) {
+            bindingResult.reject("transactionType.exists",
+                    "Тип транзакции с таким же наименованием и категорией уже существует");
+        }
         if (bindingResult.hasErrors()) {
             model.addAttribute("transactionType", transactionType);
             model.addAttribute("categories", TransactionCategory.values());
