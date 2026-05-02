@@ -1,5 +1,6 @@
 package org.income_expenses.repositories;
 
+import org.income_expenses.models.Organization;
 import org.income_expenses.models.TransactionType;
 import org.income_expenses.models.WalletTransaction;
 import org.springframework.data.domain.Page;
@@ -75,4 +76,6 @@ public interface WalletTransactionRepository extends JpaRepository<WalletTransac
     long expenseTransactionsCount(@Param("userId") Long userId, @Param("walletId") Long walletId);
 
     boolean existsByTransactionType(TransactionType transactionType);
+
+    boolean existsByOrganization(Organization organization);
 }
