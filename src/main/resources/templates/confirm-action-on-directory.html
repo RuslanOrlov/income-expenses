@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
     <title th:if="${action == 'deleting'}">The Confirmation of the Directory Item Deleting</title>
+    <title th:if="${action == 'warning'}">Warning that Deleting the Directory Item is Impossible</title>
 </head>
 
 <body class="flex flex-col min-h-screen">
@@ -68,12 +69,21 @@
 
                         <h3 id="hs-sign-out-alert-label" class="mb-2 text-2xl font-bold text-foreground">
                             <span th:if="${action == 'deleting'}">Удаление элемента справочника</span>
+                            <span th:if="${action == 'warning'}">Предупреждение</span>
                         </h3>
                         <p th:if="${action == 'deleting'}"
                            class="text-muted-foreground-1">
                             Вы уверены, что хотите удалить выбранный элемент справочника
                             <span th:text="${directory}"></span>
                             ?
+                        </p>
+                        <p th:if="${action == 'warning'}"
+                           class="text-muted-foreground-1">
+                            Вы не можете удалить элемент справочника
+                            <span th:text="${directory}"></span>
+                            с идентификатором
+                            <span th:text="${id}"></span>
+                            , потому что он используется в транзакциях
                         </p>
 
                         <form class="mt-6 flex justify-center gap-x-4"
@@ -90,7 +100,8 @@
                                     class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-primary border border-primary-line text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none" data-hs-overlay="#hs-sign-out-alert"
                                     th:formaction="@{${returnTo}}"
                                     th:formmethod="get">
-                                Отменить
+                                <span th:if="${action == 'deleting'}">Отменить</span>
+                                <span th:if="${action == 'warning'}">Вернуться</span>
                             </button>
 
                         </form>

@@ -143,6 +143,7 @@ public class DirectoryOfPersonalFinanceController {
         model.addAttribute("actionUri", "/finance/directories/tranasction-types/" + id + "/delete");
         model.addAttribute("returnTo", "/finance/directories/tranasction-types");
         model.addAttribute("curPage", curPage);
+        model.addAttribute("id", null);
         model.addAttribute("selectedWalletId", null);
 
         return "confirm-action-on-directory";
@@ -150,7 +151,17 @@ public class DirectoryOfPersonalFinanceController {
 
     @GetMapping("/tranasction-types/{id:\\d+}/delete")
     public String deleteTransactionType(@PathVariable("id") Long id,
-                                    @RequestParam(value = "curPage", defaultValue = "0") int curPage) {
+                                    @RequestParam(value = "curPage", defaultValue = "0") int curPage, Model model) {
+        if (directoryService.isTransactionTypeAlreadyUsed(id)) {
+            model.addAttribute("directory", "\"Типы транзакций\"");
+            model.addAttribute("action", "warning");
+            model.addAttribute("actionUri", "/finance/directories/tranasction-types");
+            model.addAttribute("returnTo", "/finance/directories/tranasction-types");
+            model.addAttribute("curPage", curPage);
+            model.addAttribute("id", id);
+            model.addAttribute("selectedWalletId", null);
+            return "confirm-action-on-directory";
+        }
         directoryService.deleteTransactionType(id);
         return "redirect:/finance/directories/tranasction-types" + "?curPage=" + curPage;
     }

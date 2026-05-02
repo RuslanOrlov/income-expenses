@@ -1,5 +1,6 @@
 package org.income_expenses.repositories;
 
+import org.income_expenses.models.TransactionType;
 import org.income_expenses.models.WalletTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,4 +73,6 @@ public interface WalletTransactionRepository extends JpaRepository<WalletTransac
                         "AND (fw.owner_id = :userId OR wm.member_id = :userId) " +
                         "AND wt.category = 'EXPENSE'" )
     long expenseTransactionsCount(@Param("userId") Long userId, @Param("walletId") Long walletId);
+
+    boolean existsByTransactionType(TransactionType transactionType);
 }

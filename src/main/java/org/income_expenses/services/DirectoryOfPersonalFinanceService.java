@@ -6,6 +6,7 @@ import org.income_expenses.dto.TransactionTypeDto;
 import org.income_expenses.models.TransactionCategory;
 import org.income_expenses.models.TransactionType;
 import org.income_expenses.repositories.TransactionTypeRepository;
+import org.income_expenses.repositories.WalletTransactionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 public class DirectoryOfPersonalFinanceService {
 
     private final TransactionTypeRepository transactionTypeRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
 
     public Page<TransactionType> getAllTransactionTypes(int curPage, int pageSize) {
         Pageable pageable = PageRequest.of(curPage, pageSize, Sort.by("id"));
@@ -61,5 +63,10 @@ public class DirectoryOfPersonalFinanceService {
         String transactionTypeName = transactionType.getTransactionTypeName();
         TransactionCategory category = transactionType.getCategory();
         return transactionTypeRepository.existsByTransactionTypeNameIgnoringCaseAndCategoryAndIdNot(transactionTypeName, category, id);
+    }
+
+    public boolean isTransactionTypeAlreadyUsed(Long id) {
+        TransactionType transactionType = getTransactionTypeById(id);
+        return walletTransactionRepository.existsByTransactionType(transactionType);
     }
 }
