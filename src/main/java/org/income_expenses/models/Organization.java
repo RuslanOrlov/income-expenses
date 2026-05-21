@@ -20,6 +20,8 @@ public class Organization {
 
     private String organizationName;
 
+    private String description;
+
     @Enumerated(value = EnumType.STRING)
     private TransactionCategory category;
 

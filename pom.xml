@@ -97,6 +97,20 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security-oauth2-client</artifactId>
 		</dependency>
+
+		<!-- Spring Boot starter for auto-configuring declarative AI Services, RAG, Tools etc. -->
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-spring-boot4-starter</artifactId>
+			<version>1.15.0-beta25</version>
+		</dependency>
+		<!-- Spring Boot starter for creating and configuring language models, embedding models,
+			 embedding stores, and other core LangChain4j components through properties. -->
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-open-ai-spring-boot4-starter</artifactId>
+			<version>1.15.0-beta25</version>
+		</dependency>
 	</dependencies>
 
 	<build>

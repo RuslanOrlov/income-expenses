@@ -11,6 +11,7 @@ import org.income_expenses.models.WalletTransaction;
 import org.income_expenses.repositories.WalletMemberRepository;
 import org.income_expenses.services.FinanceService;
 import org.income_expenses.services.IncomeExpenseService;
+import org.income_expenses.services.ReceiptProcessingService;
 import org.income_expenses.services.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ public class ExpenseController {
     private final FinanceService financeService;
     private final UserService userService;
     private final WalletMemberRepository walletMemberRepository;
+    private final ReceiptProcessingService receiptProcessingService;
 
     // Определение текущего пользователя как общего атрибута модели
     @ModelAttribute("currentUser")
@@ -149,6 +152,40 @@ public class ExpenseController {
         incomeExpenseService.changeIncomeOrExpenseTransaction(transaction, id);
 
         return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
+    }
+
+    @GetMapping("/load-image")
+    public String openFromToLoadReceiptImage(Model model,
+                                             @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+                                             @RequestParam(value = "walletId", required = false) Long walletId) {
+        model.addAttribute("mainPath", "/finance/expense");
+        model.addAttribute("title", "Создание расходной транзакции на основе изображения");
+        model.addAttribute("curPage", curPage);
+        model.addAttribute("selectedWalletId", walletId);
+        return "transaction-create-from-image";
+    }
+
+    @PostMapping("/load-image")
+    public String receiveImage(@RequestParam(value = "curPage", defaultValue = "0") int curPage,
+                               @RequestParam(value = "walletId", required = false) Long walletId,
+                               @RequestParam(value = "file", required = false) MultipartFile file,
+                               Model model) {
+        if (file == null || file.isEmpty()) {
+            return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
+        }
+
+        TransactionDto transactionDto = receiptProcessingService.processReceipt(file);
+
+        model.addAttribute("mainPath", "/finance/expense");
+        model.addAttribute("title", "Создание расходной транзакции");
+        model.addAttribute("transaction", transactionDto);
+        model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.EXPENSE));
+        model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
+        model.addAttribute("curPage", curPage);
+        model.addAttribute("selectedWalletId", walletId);
+        model.addAttribute("mode", "EXPENSE");
+
+        return "transaction-create";
     }
 
     @GetMapping("/create")
