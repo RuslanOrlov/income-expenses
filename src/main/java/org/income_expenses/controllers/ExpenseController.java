@@ -23,6 +23,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,11 +184,23 @@ public class ExpenseController {
         String sessionId = UUID.randomUUID().toString();
         session.setAttribute("sessionId", sessionId);
 
+        // Читаем файл в массив байтов ПЕРЕД запуском потока
+        byte[] fileBytes;
+        String contentType = file.getContentType();
+        try {
+            fileBytes = file.getBytes();
+        } catch (IOException e) {
+            log.error("Не удалось прочитать файл", e);
+            return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
+        }
+
         new Thread(() -> {
             try {
-                TransactionDto transactionDto = receiptProcessingService.processReceipt(file);
+                // Передаём в сервис байты, а не MultipartFile
+                TransactionDto transactionDto = receiptProcessingService.processReceipt(fileBytes, contentType);
                 session.setAttribute("transactionDto_" + sessionId, transactionDto);
             } catch (Exception e) {
+                log.error("Ошибка обработки файла изображения", e);
                 session.setAttribute("transactionDto_" + sessionId, null);
             }
         }).start();
@@ -259,7 +272,7 @@ public class ExpenseController {
         return "transaction-create";
     }
 
-    @PostMapping("/load-image-old")
+    /*@PostMapping("/load-image-old")
     public String receiveImage(@RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                @RequestParam(value = "walletId", required = false) Long walletId,
                                @RequestParam(value = "file", required = false) MultipartFile file,
@@ -280,9 +293,9 @@ public class ExpenseController {
         model.addAttribute("mode", "EXPENSE");
 
         return "transaction-create";
-    }
+    }*/
 
-    @GetMapping("/create-old")
+    /*@GetMapping("/create-old")
     public String openCreateForm(Model model,
                                  @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                  @RequestParam(value = "walletId", required = false) Long walletId) {
@@ -298,7 +311,7 @@ public class ExpenseController {
         model.addAttribute("selectedWalletId", walletId);
         model.addAttribute("mode", "EXPENSE");
         return "transaction-create";
-    }
+    }*/
 
     @PostMapping("/create")
     public String createExpense(@ModelAttribute("transaction") @Valid TransactionDto transaction,

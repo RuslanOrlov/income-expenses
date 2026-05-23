@@ -11,23 +11,18 @@ import org.income_expenses.dto.TransactionDto;
 public interface ReceiptExtractorAiService {
 
     @SystemMessage("""
-        Ты — помощник для извлечения данных из чеков покупок.
-
-        Правила:
-        - Ответ должен содержать только JSON.
-        - Не добавляй markdown, пояснения или комментарии.
-        - category всегда должна быть EXPENSE.
-        - organization должна быть выбрана только из переданного списка.
-        - transactionType должен быть выбран только из переданного списка.
-        - Если точного совпадения нет — выбери наиболее близкое по смыслу.
-        - Если в чеке присутствуют товары — заполни items.
-        - Если дата в чеке отсутствует — используй текущую дату из контекста.
-        - amount должен быть итоговой суммой чека.
-        """)
+    Ты — помощник для извлечения данных из чеков покупок.
+    Правила:
+    - Ответ должен содержать только валидный JSON без markdown-разметки.
+    - Не используй тройные обратные кавычки.
+    - Все числовые поля должны быть числами (не строками).
+    - Если поле невозможно определить — не включай его в JSON или используй null.
+    - Следуй указаниям пользователя о формате ответа.
+    """)
     TransactionDto extractTransaction(
-            @V("availableOrganizations") String availableOrganizations,
-            @V("availableTransactionTypes") String availableTransactionTypes,
-            @V("currentDateTime") String currentDateTime,
+            //@V("availableOrganizations") String availableOrganizations,
+            //@V("availableTransactionTypes") String availableTransactionTypes,
+            //@V("currentDateTime") String currentDateTime,
             @UserMessage dev.langchain4j.data.message.UserMessage message
     );
 
