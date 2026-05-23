@@ -577,6 +577,9 @@
   .h-2 {
     height: calc(var(--spacing) * 2);
   }
+  .h-2\.5 {
+    height: calc(var(--spacing) * 2.5);
+  }
   .h-6 {
     height: calc(var(--spacing) * 6);
   }
@@ -585,6 +588,9 @@
   }
   .h-full {
     height: 100%;
+  }
+  .h-screen {
+    height: 100vh;
   }
   .max-h-60 {
     max-height: calc(var(--spacing) * 60);

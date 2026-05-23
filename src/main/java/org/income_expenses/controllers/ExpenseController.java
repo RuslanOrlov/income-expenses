@@ -1,5 +1,6 @@
 package org.income_expenses.controllers;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,10 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -166,6 +170,96 @@ public class ExpenseController {
     }
 
     @PostMapping("/load-image")
+    public String receiveImage(
+            @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+            @RequestParam(value = "walletId", required = false) Long walletId,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            HttpSession session) {
+
+        if (file == null || file.isEmpty()) {
+            return "redirect:/finance/expense" + (walletId != null ? "?walletId=" + walletId + "&curPage=" + curPage : "");
+        }
+
+        String sessionId = UUID.randomUUID().toString();
+        session.setAttribute("sessionId", sessionId);
+
+        new Thread(() -> {
+            try {
+                TransactionDto transactionDto = receiptProcessingService.processReceipt(file);
+                session.setAttribute("transactionDto_" + sessionId, transactionDto);
+            } catch (Exception e) {
+                session.setAttribute("transactionDto_" + sessionId, null);
+            }
+        }).start();
+
+        return "redirect:/finance/expense/processing-receipt?curPage=" + curPage + "&walletId=" + walletId;
+    }
+
+    @GetMapping("/processing-receipt")
+    public String showProcessingReceipt(
+            @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+            @RequestParam(value = "walletId", required = false) Long walletId,
+            Model model) {
+        model.addAttribute("curPage", curPage);
+        model.addAttribute("selectedWalletId", walletId);
+        return "processing-receipt";
+    }
+
+    @GetMapping("/check-processing-status")
+    @ResponseBody
+    public Map<String, Object> checkProcessingStatus(
+            @RequestParam(value = "sessionId",  required = false) String sessionId,
+            @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+            @RequestParam(value = "walletId", required = false) Long walletId,
+            HttpSession session) {
+
+        TransactionDto transactionDto = (TransactionDto) session.getAttribute("transactionDto_" + sessionId);
+
+        Map<String, Object> response = new HashMap<>();
+        if (transactionDto != null) {
+            String redirectUrl = "/finance/expense/create?curPage=" + curPage + "&walletId=" + walletId;
+
+            // Сохраняем transactionDto в сессии, чтобы он был доступен в форме создания
+            session.setAttribute("tempTransactionDto", transactionDto);
+
+            response.put("isProcessed", true);
+            response.put("redirectUrl", redirectUrl);
+        } else {
+            response.put("isProcessed", false);
+        }
+        return response;
+    }
+
+    @GetMapping("/create")
+    public String openCreateForm(
+            Model model,
+            @RequestParam(value = "curPage", defaultValue = "0") int curPage,
+            @RequestParam(value = "walletId", required = false) Long walletId,
+            HttpSession session) {
+
+        TransactionDto transactionDto = (TransactionDto) session.getAttribute("tempTransactionDto");
+        if (transactionDto == null) {
+            transactionDto = TransactionDto.builder()
+                    .category(TransactionCategory.EXPENSE)
+                    .items(List.of())
+                    .build();
+        } else {
+            session.removeAttribute("tempTransactionDto"); // Очистка после использования
+        }
+
+        model.addAttribute("mainPath", "/finance/expense");
+        model.addAttribute("title", "Создание расходной транзакции");
+        model.addAttribute("transaction", transactionDto);
+        model.addAttribute("organizations", incomeExpenseService.getOrganizations(TransactionCategory.EXPENSE));
+        model.addAttribute("types", incomeExpenseService.getTransactionTypeList(TransactionCategory.EXPENSE));
+        model.addAttribute("curPage", curPage);
+        model.addAttribute("selectedWalletId", walletId);
+        model.addAttribute("mode", "EXPENSE");
+
+        return "transaction-create";
+    }
+
+    @PostMapping("/load-image-old")
     public String receiveImage(@RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                @RequestParam(value = "walletId", required = false) Long walletId,
                                @RequestParam(value = "file", required = false) MultipartFile file,
@@ -188,7 +282,7 @@ public class ExpenseController {
         return "transaction-create";
     }
 
-    @GetMapping("/create")
+    @GetMapping("/create-old")
     public String openCreateForm(Model model,
                                  @RequestParam(value = "curPage", defaultValue = "0") int curPage,
                                  @RequestParam(value = "walletId", required = false) Long walletId) {

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Processing Receipt</title>
+    <link th:href="@{/css/output.css}" rel="stylesheet">         <!-- Tailwind CSS -->
+</head>
+
+<body>
+<div class="flex justify-center items-center h-screen">
+    <div class="text-center">
+        <p class="text-lg font-bold mb-4">Подождите, пожалуйста. Идет процесс обработки загруженного изображения.</p>
+        <p class="text-lg mb-4">Ожидание: <span id="timer">0</span> секунд</p>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const curPage = urlParams.get('curPage');
+    const walletId = urlParams.get('walletId');
+    const sessionId = "[(${session.sessionId})]";
+
+    let seconds = 0;
+    const timerElement = document.getElementById("timer");
+    const progressBar = document.getElementById("progressBar");
+
+    const interval = setInterval(() => {
+        seconds++;
+        timerElement.textContent = seconds;
+        progressBar.style.width = (seconds % 10) * 10 + "%";
+    }, 1000);
+
+    const checkProcessingStatus = () => {
+        fetch(`/finance/expense/check-processing-status?sessionId=${sessionId}&curPage=${curPage}&walletId=${walletId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.isProcessed) {
+                    clearInterval(interval);
+                    window.location.href = data.redirectUrl;
+                }
+            });
+    };
+
+    setInterval(checkProcessingStatus, 2000); // Проверка каждые 2 секунды
+</script>
+<script th:src="@{/js/preline.js}"></script>                 <!-- Preline UI -->
+</body>
+</html>
