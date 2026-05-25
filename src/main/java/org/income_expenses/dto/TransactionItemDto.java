@@ -26,7 +26,7 @@ public class TransactionItemDto {
 
     @NotNull(message = "Количество не может быть пустым")
     @Positive(message = "Количество должно быть > 0")
-    @Digits(integer = 10, fraction = 3, message = "Формат: до 10 цифр до запятой, 2 после")
+    @Digits(integer = 10, fraction = 3, message = "Формат: до 10 цифр до запятой, 3 после")
     private BigDecimal quantity;
 
     @NotNull(message = "Сумма не может быть пустой")
